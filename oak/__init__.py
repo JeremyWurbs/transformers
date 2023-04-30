@@ -6,4 +6,5 @@ from oak.core.mhsa import MultiHeadSelfAttention
 from oak.core.sab import SelfAttentionBlock
 from oak.core.vision_transformer import VisionTransformer
 from oak.utils import LightningModel
+from oak.utils import Visualizer
 from oak.models import ViTBase, ViTLarge, ViTHuge
