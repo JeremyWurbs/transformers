@@ -27,8 +27,8 @@ class LightningModel(pl.LightningModule):
         x, y = batch
         logits = self.forward(x)
         loss = self.loss(logits, y)
-        self.log(f'{step_type}_loss_step', loss)
-        self.log(f'{step_type}_acc_step', self.accuracy_metrics[step_type](logits, y))
+        self.log(f'{step_type}_loss_step', loss, sync_dist=True)
+        self.log(f'{step_type}_acc_step', self.accuracy_metrics[step_type].to(x.get_device())(logits, y), sync_dist=True)
         return loss
 
     def training_step(self, train_batch, batch_idx):
@@ -40,14 +40,14 @@ class LightningModel(pl.LightningModule):
     def test_step(self, test_batch, batch_idx):
         return self._step(test_batch, 'test')
 
-    def training_epoch_end(self, _):
-        self.log('train_acc_epoch', self.accuracy_metrics['train'].compute())
+    def on_train_epoch_end(self):
+        self.log('train_acc_epoch', self.accuracy_metrics['train'].compute(), sync_dist=True)
 
-    def validation_epoch_end(self, _):
-        self.log('val_acc_epoch', self.accuracy_metrics['val'].compute())
+    def on_validation_epoch_end(self):
+        self.log('val_acc_epoch', self.accuracy_metrics['val'].compute(), sync_dist=True)
 
-    def test_epoch_end(self, _):
-        self.log('test_acc_epoch', self.accuracy_metrics['test'].compute())
+    def on_test_epoch_end(self):
+        self.log('test_acc_epoch', self.accuracy_metrics['test'].compute(), sync_dist=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
