@@ -45,7 +45,7 @@ class Attention(nn.Module):
         nn.init.xavier_uniform_(self.W_K)
         nn.init.xavier_uniform_(self.W_V)
 
-    def forward(self, X):
+    def forward(self, X, store_values=False):
         # X should have dimension (B, L, d_model)
         Q = X @ self.W_Q  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
         K = X @ self.W_K  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
@@ -53,5 +53,11 @@ class Attention(nn.Module):
 
         A = F.softmax(Q @ K.transpose(-2, -1) * self.d_k ** -0.5, dim=-1)  # -> (B, L, L)
         Z = A @ V  # (B, L, L) @ (B, L, d_model) -> (B, L, d_model)
+
+        if store_values:
+            self.Q = Q
+            self.K = K
+            self.V = V
+            self.A = A
 
         return Z

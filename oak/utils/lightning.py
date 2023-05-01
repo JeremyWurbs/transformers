@@ -28,7 +28,7 @@ class LightningModel(pl.LightningModule):
         logits = self.forward(x)
         loss = self.loss(logits, y)
         self.log(f'{step_type}_loss_step', loss, sync_dist=True)
-        self.log(f'{step_type}_acc_step', self.accuracy_metrics[step_type].to(x.get_device())(logits, y), sync_dist=True)
+        self.log(f'{step_type}_acc_step', self.accuracy_metrics[step_type].to(x.device)(logits, y), sync_dist=True)
         return loss
 
     def training_step(self, train_batch, batch_idx):
