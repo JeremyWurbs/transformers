@@ -9,10 +9,12 @@ import pytorch_lightning as pl
 
 
 class MNISTDataModule(pl.LightningDataModule):
-    def __init__(self, batch_size=64, num_workers=None):
+    def __init__(self, batch_size=64, num_workers=None, num_train=55000, num_val=5000):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers if num_workers is not None else max(os.cpu_count() // 2, 1)
+        self.num_train = num_train
+        self.num_val = num_val
 
     def prepare_data(self):
         # download data
@@ -22,7 +24,7 @@ class MNISTDataModule(pl.LightningDataModule):
     def setup(self, stage: Optional[str] = None):
         transform = transforms.Compose([transforms.ToTensor(),
                                         transforms.Normalize((0.1307,), (0.3081,))])
-        self.train, self.val = random_split(MNIST(os.getcwd(), train=True, transform=transform), [55000, 5000])
+        self.train, self.val = random_split(MNIST(os.getcwd(), train=True, transform=transform), [self.num_train, self.num_val])
         self.test = MNIST(os.getcwd(), train=False, transform=transform)
 
     def train_dataloader(self):
