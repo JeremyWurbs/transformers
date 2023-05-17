@@ -146,7 +146,3 @@ class Visualizer(nn.Module):
             image = imageio.v3.imread(fn)
             frames.append(image)
         imageio.mimsave(f'{save_gif_filename}', frames, fps=fps)
-
-
-
-

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class Embedding(nn.Module):
+class ImageEmbedding(nn.Module):
     """Vision Transformer Patch Embedding Module
 
     Takes an input of dimensions (B, C, H, W) and returns an embedding of dimension:

@@ -1,11 +1,11 @@
 from warnings import warn
 import torch.nn as nn
 
-from oak import MLP, Embedding, SelfAttentionBlock
+from oak import MLP, ImageEmbedding, SelfAttentionBlock
 
 
 class VisionTransformer(nn.Module):
-    def __init__(self, input_dim, num_classes, blocks, P, h, d_model, d_k=None, d_v=None, dropout=0., mlp_size=None):
+    def __init__(self, input_dim, num_classes, num_blocks, P, h, d_model, d_k=None, d_v=None, dropout=0., mlp_size=None):
         super().__init__()
 
         assert len(input_dim) == 3, f'Number of input_dims must be three, received {input_dim}'
@@ -30,8 +30,8 @@ class VisionTransformer(nn.Module):
         self.d_v = d_v
         self.dropout = dropout
 
-        self.embedding = Embedding(C=C, H=H, W=W, P=P, d_model=d_model, bias=False, positional_encoding=False)
-        self.blocks = nn.Sequential(*[SelfAttentionBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(blocks)])
+        self.embedding = ImageEmbedding(C=C, H=H, W=W, P=P, d_model=d_model, bias=True, positional_encoding=True)
+        self.blocks = nn.Sequential(*[SelfAttentionBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
         self.mlp = MLP(input_dim=d_model, output_dim=num_classes, hidden_dim=mlp_size, dropout=dropout)
 
     def forward(self, x):
