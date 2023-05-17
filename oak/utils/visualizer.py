@@ -76,6 +76,7 @@ class Visualizer(nn.Module):
         only consider a single embedding (e.g. the "class token embedding" -> usually embed_idx=0), you may pass in an
         embed_index, which will pick out only that embedding when collecting features.
         """
+        torch.manual_seed(42)
         if features is None:
             features = self.features
 
@@ -102,8 +103,8 @@ class Visualizer(nn.Module):
             approx = torch.matmul(projection, V.T)
 
             PCA[layer] = dict()
-            PCA[layer]['V'] = V
-            PCA[layer]['proj'] = projection
+            PCA[layer]['V'] = V.cpu()
+            PCA[layer]['proj'] = projection.cpu()
             PCA[layer]['acc_var'] = torch.var(approx) / torch.var(projection) * 100
 
         return PCA
@@ -124,7 +125,7 @@ class Visualizer(nn.Module):
                 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
             else:
                 fig, ax = plt.subplots()
-            labels = features['labels']
+            labels = features['labels'].cpu()
             if f.shape[0] != labels.shape[0]:  # e.g. if we are in an embedding or mhsa layer
                 d_ = f.shape[0] // labels.shape[0]
                 labels = labels.repeat_interleave(repeats=d_, dim=0)
@@ -139,10 +140,11 @@ class Visualizer(nn.Module):
             plt.show()
         else:
             plt.savefig(save_fig_filename, transparent=False, facecolor='white')
+            plt.close()
 
-    def create_gif(self, fig_filenames, save_gif_filename, fps=5):
+    def create_gif(self, fig_filenames, save_gif_filename, duration=5):
         frames = list()
         for fn in fig_filenames:
             image = imageio.v3.imread(fn)
             frames.append(image)
-        imageio.mimsave(f'{save_gif_filename}', frames, fps=fps)
+        imageio.mimsave(f'{save_gif_filename}', frames, duration=duration)
