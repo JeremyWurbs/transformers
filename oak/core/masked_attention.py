@@ -7,15 +7,15 @@ from oak import Attention
 class MaskedAttention(Attention):
     def __init__(self, d_model, d_k, d_v):
         super().__init__(d_model=d_model, d_k=d_k, d_v=d_v)
-        self.register_buffer('mask', None)
+        self.register_buffer('mask', torch.Tensor(torch.empty(0)))
 
     def forward(self, X, store_values=False):
         # X should have dimension (B, L, d_model)
         B, L, d_model = X.shape
 
-        if self.mask is None:
+        if self.mask.numel() < 1:
             mask = torch.tril(torch.ones(L, L))
-            self.mask = mask.masked_fill(mask == 0, float('-inf')).unsqueeze(dim=0).repeat(B, 1, 1)
+            self.mask = mask.masked_fill(mask == 0, float('-inf')).unsqueeze(dim=0).repeat(B, 1, 1).type_as(self.mask)
 
         Q = X @ self.W_Q  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
         K = X @ self.W_K  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
