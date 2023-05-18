@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from oak import Attention
+from oak import Attention, MaskedAttention
 
 
 class MultiHeadSelfAttention(nn.Module):
@@ -34,7 +34,7 @@ class MultiHeadSelfAttention(nn.Module):
         dropout: probability of each individual output being zeroed during training
     """
 
-    def __init__(self, h, d_model, d_k, d_v, dropout=0.):
+    def __init__(self, h, d_model, d_k, d_v, dropout=0., mask=False):
         super().__init__()
 
         assert d_model % h == 0, 'd_model must be divisible by h'
@@ -46,7 +46,10 @@ class MultiHeadSelfAttention(nn.Module):
         self.d_v = d_v
         self.dropout = dropout
 
-        self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v) for _ in range(h)])
+        if mask is True:
+            self.heads = nn.ModuleList([MaskedAttention(d_model=self.d_head, d_k=d_k, d_v=d_v) for _ in range(h)])
+        else:
+            self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v) for _ in range(h)])
         self.linear = nn.Linear(d_model, d_model)
         self.dropout = nn.Dropout(dropout)
 
@@ -55,4 +58,5 @@ class MultiHeadSelfAttention(nn.Module):
         x = x.view(B, L, self.h, self.d_model // self.h)  # (B, L, d_model) -> (B, L, h, d_head)
         Z = torch.cat([self.heads[i](x[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)
         Z = self.dropout(self.linear(Z))
+
         return Z

@@ -40,7 +40,7 @@ class ImageEmbedding(nn.Module):
 
     Further, let
         B: batch size
-        N: number of patches (i.e. H*W / P^2)
+        N: number of patches (i.e. H*W / P**2)
         L: sequence length; equal to the number of patches plus one for the class token, if used
 
     Parameters
