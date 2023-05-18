@@ -13,7 +13,7 @@ class MaskedAttention(Attention):
         # X should have dimension (B, L, d_model)
         B, L, d_model = X.shape
 
-        if self.mask.numel() < 1:
+        if X.shape != self.mask.shape:
             mask = torch.tril(torch.ones(L, L))
             self.mask = mask.masked_fill(mask == 0, float('-inf')).unsqueeze(dim=0).repeat(B, 1, 1).type_as(self.mask)
 
