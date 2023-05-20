@@ -28,8 +28,9 @@ class Attention(nn.Module):
         W_v: Value weight matrix of dimension (L x d_v)
     """
 
-    def __init__(self, d_model, d_k, d_v):
+    def __init__(self, d_model, d_k, d_v, mask=False):
         super().__init__()
+        self.use_mask = mask
         self.W_Q = nn.Parameter(torch.empty(d_model, d_k))
         self.W_K = nn.Parameter(torch.empty(d_model, d_k))
         self.W_V = nn.Parameter(torch.empty(d_model, d_v))
@@ -46,12 +47,16 @@ class Attention(nn.Module):
         nn.init.xavier_uniform_(self.W_V)
 
     def forward(self, X, store_values=False):
-        # X should have dimension (B, L, d_model)
+        B, L, d_model = X.shape
         Q = X @ self.W_Q  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
         K = X @ self.W_K  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
         V = X @ self.W_V  # (B, L, d_model) @ (d_model, d_v) -> (B, L, d_v)
 
-        A = F.softmax(Q @ K.transpose(-2, -1) * self.d_k ** -0.5, dim=-1)  # -> (B, L, L)
+        dot_product = Q @ K.transpose(-2, -1) * self.d_k ** -0.5
+        if self.use_mask:
+            mask = torch.tril(torch.ones(L, L)).to(self.W_Q.device)
+            dot_product = dot_product.masked_fill(mask == 0, float('-inf'))
+        A = F.softmax(dot_product, dim=-1)  # -> (B, L, L)
         Z = A @ V  # (B, L, L) @ (B, L, d_model) -> (B, L, d_model)
 
         if store_values:

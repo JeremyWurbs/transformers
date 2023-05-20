@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from oak import Attention, MaskedAttention
+from oak import Attention
 
 
 class MultiHeadSelfAttention(nn.Module):
@@ -46,10 +46,7 @@ class MultiHeadSelfAttention(nn.Module):
         self.d_v = d_v
         self.dropout = dropout
 
-        if mask is True:
-            self.heads = nn.ModuleList([MaskedAttention(d_model=self.d_head, d_k=d_k, d_v=d_v) for _ in range(h)])
-        else:
-            self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v) for _ in range(h)])
+        self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v, mask=mask) for _ in range(h)])
         self.linear = nn.Linear(d_model, d_model)
         self.dropout = nn.Dropout(dropout)
 
