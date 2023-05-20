@@ -49,3 +49,7 @@ class NLPTransformer(nn.Module):
             context = torch.cat((context, next_pred), dim=1)
 
         return context
+
+    @property
+    def num_param(self):
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
