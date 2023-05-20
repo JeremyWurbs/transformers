@@ -13,13 +13,12 @@ class ShakespeareDataset(Dataset):
         self.data = data
         self.block_size = block_size
         self.batch_and_mask = batch_and_mask
-        self.d_emb = 1
 
     def __len__(self):
         return len(self.data)-self.block_size
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.data[idx:idx + self.block_size]).view(self.block_size, self.d_emb)
+        x = torch.tensor(self.data[idx:idx + self.block_size])
         y = torch.tensor(self.data[idx + 1:idx + self.block_size + 1])
         return x, y
 
