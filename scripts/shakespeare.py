@@ -5,7 +5,7 @@ from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 
 from oak import Shakespeare, NLPTransformer, LightningModel
 
-torch.set_float32_matmul_precision('medium')
+#torch.set_float32_matmul_precision('medium')
 
 param = {
     'num_blocks': 4,

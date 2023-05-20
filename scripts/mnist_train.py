@@ -1,9 +1,11 @@
 import os
+import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 
 from oak import MNIST, VisionTransformer, LightningModel
 
+#torch.set_float32_matmul_precision('medium')
 
 param = {
     'input_dim': [1, 28, 28],

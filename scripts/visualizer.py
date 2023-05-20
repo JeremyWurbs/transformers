@@ -7,7 +7,7 @@ from oak import MNIST, Visualizer, VisionTransformer, LightningModel
 param = {
     'input_dim': [1, 28, 28],
     'num_classes': 10,
-    'blocks': 1,
+    'num_blocks': 1,
     'P': 14,
     'h': 2,
     'd_model': 64
