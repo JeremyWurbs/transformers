@@ -6,7 +6,7 @@ from oak import TextEmbedding, SelfAttentionBlock, MLP
 
 
 class NLPTransformer(nn.Module):
-    def __init__(self, seq_len, num_blocks, vocab_size, h, d_model, d_k=None, d_v=None, dropout=0., mlp_size=None):
+    def __init__(self, seq_len, num_blocks, vocab_size, h, d_model, d_k=None, d_v=None, dropout=0., mlp_size=None, **_):
         super().__init__()
 
         assert d_model % h == 0, 'd_model must be divisible by h'
