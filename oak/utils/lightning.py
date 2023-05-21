@@ -10,9 +10,10 @@ from oak import Visualizer
 class LightningModel(pl.LightningModule):
     """Lightning wrapper for torch.nn.Modules"""
 
-    def __init__(self, base_model: nn.Module, num_classes=10, use_visualizer=False, visualizer_args=None):
+    def __init__(self, base_model: nn.Module, num_classes=10, use_visualizer=False, visualizer_args=None, validation_hook=None):
         super().__init__()
         self.use_visualizer = use_visualizer
+        self.validation_hook = validation_hook
         if use_visualizer:
             self.model = Visualizer(base_model, **visualizer_args)
             self.val_PCA = list()
@@ -60,10 +61,12 @@ class LightningModel(pl.LightningModule):
         if self.use_visualizer:
             PCA = self.model.PCA()
             self.val_PCA.append(PCA)
+        if self.validation_hook is not None:
+            self.validation_hook()
 
     def on_test_epoch_end(self):
         self.log('test_acc_epoch', self.accuracy_metrics['test'].compute(), sync_dist=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=1e-3)
         return optimizer
