@@ -10,8 +10,9 @@ from oak import Visualizer
 class LightningModel(pl.LightningModule):
     """Lightning wrapper for torch.nn.Modules"""
 
-    def __init__(self, base_model: nn.Module, num_classes=10, use_visualizer=False, visualizer_args=None, validation_hook=None):
+    def __init__(self, base_model: nn.Module, num_classes=10, lr=1e-3, use_visualizer=False, visualizer_args=None, validation_hook=None):
         super().__init__()
+        self.lr = lr
         self.use_visualizer = use_visualizer
         self.validation_hook = validation_hook
         if use_visualizer:
@@ -54,10 +55,10 @@ class LightningModel(pl.LightningModule):
         return self._step(test_batch, 'test')
 
     def on_train_epoch_end(self):
-        self.log('train_acc_epoch', self.accuracy_metrics['train'].compute(), sync_dist=True)
+        self.log('train_acc_epoch', self.accuracy_metrics['train'].compute(), sync_dist=True, prog_bar=True)
 
     def on_validation_epoch_end(self):
-        self.log('val_acc_epoch', self.accuracy_metrics['val'].compute(), sync_dist=True)
+        self.log('val_acc_epoch', self.accuracy_metrics['val'].compute(), sync_dist=True, prog_bar=True)
         if self.use_visualizer:
             PCA = self.model.PCA()
             self.val_PCA.append(PCA)
@@ -65,8 +66,8 @@ class LightningModel(pl.LightningModule):
             self.validation_hook()
 
     def on_test_epoch_end(self):
-        self.log('test_acc_epoch', self.accuracy_metrics['test'].compute(), sync_dist=True)
+        self.log('test_acc_epoch', self.accuracy_metrics['test'].compute(), sync_dist=True, prog_bar=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.model.parameters(), lr=1e-3)
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
         return optimizer

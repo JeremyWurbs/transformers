@@ -1,4 +1,5 @@
 from oak.utils.shakespeare_tokenizer import ShakespeareTokenizer
+from oak.utils.tokenizer import Tokenizer
 from oak.data.shakespeare import ShakespeareDataModule as Shakespeare
 from oak.data.mnist import MNISTDataModule as MNIST
 from oak.core.mlp import MLP
