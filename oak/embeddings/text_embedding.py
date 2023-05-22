@@ -17,49 +17,27 @@ class TextEmbedding(nn.Module):
     use a learnable weight embedding for the positional encodings.
 
     Args
+        vocab_size: number of words in the tokenizer dictionary
         d_model: model size (a free parameter defined by the Transformer architecture)
-        bias: whether to use bias weights for the embedding projection
         positional_encoding: whether to use positional encodings
-
-        Further, let
-            B: batch size
-            L: sequence length; equal to the number of words in the input sequence
-
-        Parameters
-            The embedding module trains the following parameters:
-            W_emb & B_emb: The embedding weights and biases to transform each image patch from length P**2 to d_model
-            pos_enc: 1D positional encodings added onto the output embedded
+        seq_len: sequence length, L; required only if positional_encoding is set to True
     """
 
-    def __init__(self, d_model, bias=True, seq_len=None, positional_encoding=True):
+    def __init__(self, vocab_size, d_model, seq_len=None, positional_encoding=True):
         if positional_encoding is True:
             assert seq_len is not None, 'Sequence length must be given to use positional encoding'
 
         super().__init__()
+        self.vocab_size = vocab_size
         self.d_model = d_model
+        self.seq_len = seq_len
 
-        self.W_emb = nn.Parameter(torch.empty(1, d_model))
-        self.B_emb = nn.Parameter(torch.empty(1, 1)) if bias else None
-        self.pos_enc = nn.Parameter(torch.empty(seq_len, d_model)) if positional_encoding else None
+        self.token_enc = nn.Embedding(vocab_size, d_model)
+        self.pos_enc = nn.Embedding(seq_len, d_model) if positional_encoding else None
 
-        self.init_param()
-
-    def init_param(self):
-        nn.init.xavier_uniform_(self.W_emb)
-        if self.B_emb is not None:
-            nn.init.xavier_uniform_(self.B_emb)
+    def forward(self, tokens):
+        embedding = self.token_enc(tokens)
         if self.pos_enc is not None:
-            nn.init.xavier_uniform_(self.pos_enc)
-
-    def forward(self, x):
-        B, L = x.shape
-
-        x = x.view(B, L, 1).type_as(self.W_emb) @ self.W_emb  # (B, L) -> (B, L, d_model)
-
-        if self.B_emb is not None:
-            x += self.B_emb
-
-        if self.pos_enc is not None:
-            x += torch.arange(L).type_as(self.pos_enc) @ self.pos_enc
-
-        return x
+            pos_emb = self.pos_enc(torch.arange(self.seq_len, device=tokens.device))
+            embedding += pos_emb
+        return embedding
