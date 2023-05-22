@@ -36,8 +36,9 @@ class TextEmbedding(nn.Module):
         self.pos_enc = nn.Embedding(seq_len, d_model) if positional_encoding else None
 
     def forward(self, tokens):
+        B, L = tokens.shape
         embedding = self.token_enc(tokens)
         if self.pos_enc is not None:
-            pos_emb = self.pos_enc(torch.arange(self.seq_len, device=tokens.device))
+            pos_emb = self.pos_enc(torch.arange(L, device=tokens.device))
             embedding += pos_emb
         return embedding
