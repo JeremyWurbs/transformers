@@ -18,6 +18,7 @@ class ShakespeareDataset(Dataset):
         return len(self.data)-self.block_size
 
     def __getitem__(self, idx):
+        #idx = torch.randint(self.__len__(), (1,))
         x = torch.tensor(self.data[idx:idx + self.block_size])
         y = torch.tensor(self.data[idx + 1:idx + self.block_size + 1])
         return x, y
@@ -52,7 +53,7 @@ class ShakespeareDataModule(pl.LightningDataModule):
         return self.tokenizer.decode(idx)
 
     def train_dataloader(self):
-        return DataLoader(self.train_data, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.train_data, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=True)
 
     def val_dataloader(self):
         return DataLoader(self.val_data, batch_size=self.batch_size, num_workers=self.num_workers)
