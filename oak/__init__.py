@@ -1,6 +1,7 @@
 from oak.utils.shakespeare_tokenizer import ShakespeareTokenizer
 from oak.utils.tokenizer import Tokenizer
 from oak.data.shakespeare import ShakespeareDataModule as Shakespeare
+from oak.data.iwslt import IWSLTDataModule as IWSLT
 from oak.data.mnist import MNISTDataModule as MNIST
 from oak.core.mlp import MLP
 from oak.embeddings.text_embedding import TextEmbedding
