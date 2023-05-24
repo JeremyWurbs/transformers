@@ -112,8 +112,15 @@ Oak is meant to be easily examined and hacked for your own purposes. As such, th
 individual package components map directly onto the original architecture diagrams, as 
 seen below:
 
+## Transformer and Generative Pre-Trained (GPT)
+
 ![Package Components](./resources/transformer_package_components.png)
+
+## Vision Transformer (ViT)
+
 ![ViT Package Components](./resources/vit_package_components.png)
+
+## Package Breakdown
 
 At the highest level, each transformer architecture is located in 
 [oak.transformers](./oak/transformers):
@@ -126,53 +133,6 @@ Each of these models combines an embedding module (either a
 [image embedding module](./oak/embeddings/image_embedding.py)), an encoder comprising one 
 or more [encoder blocks](./oak/core/encoder_block.py) and, optionally, a decoder comprising 
 one or more [decoder blocks](./oak/core/decoder_block.py).
-
-
-
-
-
-Oak is meant to be easily examined and used for your own hacking purposes. The 
-main components of Oak directly follow the components from Transformer architecture 
-as described in [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf)
-and [Dosovitskiy et al. 2020](https://arxiv.org/pdf/2010.11929.pdf):
-
-1. **Embedding** ([oak.core.embedding.Embedding](./oak/core/image_embedding.py)). The input into a transformer is a 
-    (B, N, d_model) tensor, where $B$ is the batch size, $N$ is the number of 
-    representational vectors, and $d_{model}$ is the embedding dimension of each 
-    vector. That is, the Transformer does not actually know if it's receiving images,
-    text, audio, or any other domain. It just takes a vector space and transforms it
-    into another vector space. The embedding module is responsible for creating this 
-    first vector space in a sensible way given the input domain. That is, an embedding
-    module converts text or images into a (B, N, d_model) tensor. As such, each input 
-    type may use the exact same transformer architecture and just swap out a different
-    embedding module.
-2. **Scaled Dot-Product Attention** ([oak.core.attention.Attention](./oak/core/attention.py)). 
-    Vaswani et al. (2017) uses a dot-product attention module defined by the
-    equation $Attention(X, Y) = softmax(\frac{QK^T}{\sqrt{d_k}})\cdot V$, where
-    Q, K and V are matrices computed from X and Y:
-        
-    $Q = XW_k $
-    $K = YW_k $
-    $V = YW_k $
-3. **Multi-head Attention** ([oak.core.mhsa.MultiHeadAttention](./oak/core/mhsa.MultiHeadAttention)). 
-    In practice, the inputs into an attention module are split into *h* 
-    different "heads". Each head is its own attention module, with a reduced 
-    dimensionality (i.e. each head still receives input from each word token /
-    image patch, but with embedding dimension $d_{model} / h$ instead of $d_{model}$).
-
-4. **Feed Forward / MLP** ([oak.core.mlp.MLP](./oak/core/mlp.py)). Attention layers 
-    are commonly interspersed with feed forward layers. We follow
-    [Dosovitskiy et al. 2020](https://arxiv.org/pdf/2010.11929.pdf) in using a 
-    single-hidden layer MLP as the feed forward component.
-5. **Attention Block** ([oak.core.sab.SelfAttentionBlock](./oak/core/encoder_block.py)). Attention 
-    layers are coupled with feed-forward layers into "blocks" which get repeated to
-    make the network sufficiently deep. Each block pairs an attention layer and feed 
-    feed forward layer with a norm layer, and then adds residual connections and
-    dropout.
-6. **Transformer** ([oak.core.vision_transformer](./oak/core/vision_transformer.py)).
-    The Transformer ties an embedding module with a number of attention blocks,
-    along with a final MLP head matching the task at hand.
-
 
 # Reference Notation
 Oak uses the following convention throughout:
