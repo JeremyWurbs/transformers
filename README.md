@@ -93,6 +93,7 @@ together using cross-attention. Summarizing the major components of each:
 |   Decoder |      x      |                  |                      |
 |   Softmax |      x      |        x         |          x           |
 |      Task | Translation | *Text Generation | Image Classification |
+
 *Note on GPT: the original paper actually uses the GPT model for a myriad of different
 tasks, using task-specific additional heads, which we take as future work here.
 
