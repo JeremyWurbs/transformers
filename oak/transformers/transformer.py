@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from oak import TextEmbedding, EncoderBlock, DecoderBlock, MLP
+from oak import EncoderBlock, DecoderBlock, MLP
+from oak.embeddings import TextEmbedding
 
 
 class Transformer(nn.Module):

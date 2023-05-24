@@ -1,7 +1,8 @@
 from warnings import warn
 import torch.nn as nn
 
-from oak import ImageEmbedding, EncoderBlock, MLP
+from oak import EncoderBlock, MLP
+from oak.embeddings import ImageEmbedding
 
 
 class VisionTransformer(nn.Module):

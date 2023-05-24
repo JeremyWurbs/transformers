@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from oak import TextEmbedding, EncoderBlock, MLP
+from oak import EncoderBlock, MLP
+from oak.embeddings import TextEmbedding
 
 
 class GPT(nn.Module):
