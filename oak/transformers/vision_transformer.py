@@ -1,7 +1,7 @@
 from warnings import warn
 import torch.nn as nn
 
-from oak import MLP, ImageEmbedding, SelfAttentionBlock
+from oak import ImageEmbedding, EncoderBlock, MLP
 
 
 class VisionTransformer(nn.Module):
@@ -31,7 +31,7 @@ class VisionTransformer(nn.Module):
         self.dropout = dropout
 
         self.embedding = ImageEmbedding(C=C, H=H, W=W, P=P, d_model=d_model, bias=True, positional_encoding=True)
-        self.blocks = nn.Sequential(*[SelfAttentionBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
+        self.blocks = nn.Sequential(*[EncoderBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
         self.mlp = MLP(input_dim=d_model, output_dim=num_classes, hidden_dim=mlp_size, dropout=dropout)
 
     def forward(self, x):

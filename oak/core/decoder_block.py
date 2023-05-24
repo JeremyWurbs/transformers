@@ -3,8 +3,12 @@ import torch.nn as nn
 from oak import MultiHeadAttention, MLP
 
 
-class CrossAttentionBlock(nn.Module):
-    def __init__(self, h, d_model, d_k, d_v, dropout=0., mask=False):
+class DecoderBlock(nn.Module):
+    """Decoder Block
+
+    This module is a single decoder block, as defined in Vaswani et al. 2017.
+    """
+    def __init__(self, h, d_model, d_k, d_v, dropout=0., mask=True):
         super().__init__()
 
         self.mhsa = MultiHeadAttention(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout, mask=mask)

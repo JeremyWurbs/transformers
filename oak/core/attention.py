@@ -40,6 +40,7 @@ class Attention(nn.Module):
         d_model: model size (a free parameter defined by the Transformer architecture)
         d_k: dimension of the queries and keys; intuitively the number of the queries and keys
         d_v: dimension of the values; intuitively the number of values
+        mask: if set to True, masked attention will be computed
 
     Let
         B: batch size

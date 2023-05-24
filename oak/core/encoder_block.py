@@ -3,7 +3,11 @@ import torch.nn as nn
 from oak import MultiHeadAttention, MLP
 
 
-class SelfAttentionBlock(nn.Module):
+class EncoderBlock(nn.Module):
+    """Encoder Block
+
+    This module is a single encoder block, as defined in Vaswani et al. 2017.
+    """
     def __init__(self, h, d_model, d_k, d_v, dropout=0., mask=False):
         super().__init__()
 

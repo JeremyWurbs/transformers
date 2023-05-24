@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from oak import TextEmbedding, SelfAttentionBlock, MLP
+from oak import TextEmbedding, EncoderBlock, MLP
 
 
 class GPT(nn.Module):
@@ -25,7 +25,7 @@ class GPT(nn.Module):
         self.dropout = dropout
 
         self.embedding = TextEmbedding(vocab_size=vocab_size, d_model=d_model, seq_len=seq_len)
-        self.blocks = nn.Sequential(*[SelfAttentionBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout, mask=True) for _ in range(num_blocks)])
+        self.blocks = nn.Sequential(*[EncoderBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout, mask=True) for _ in range(num_blocks)])
         self.mlp = MLP(input_dim=d_model, output_dim=vocab_size, hidden_dim=mlp_size, dropout=dropout)
 
     def forward(self, x):

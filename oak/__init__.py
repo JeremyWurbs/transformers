@@ -8,8 +8,8 @@ from oak.embeddings.text_embedding import TextEmbedding
 from oak.embeddings.image_embedding import ImageEmbedding
 from oak.core.attention import Attention
 from oak.core.mha import MultiHeadAttention
-from oak.core.sab import SelfAttentionBlock
-from oak.core.cab import CrossAttentionBlock
+from oak.core.encoder_block import EncoderBlock
+from oak.core.decoder_block import DecoderBlock
 from oak.transformers.gpt import GPT
 from oak.transformers.transformer import Transformer
 from oak.transformers.vision_transformer import VisionTransformer

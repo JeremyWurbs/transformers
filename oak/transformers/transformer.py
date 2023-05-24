@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from oak import TextEmbedding, SelfAttentionBlock, CrossAttentionBlock, MLP
+from oak import TextEmbedding, EncoderBlock, DecoderBlock, MLP
 
 
 class Transformer(nn.Module):
@@ -28,10 +28,10 @@ class Transformer(nn.Module):
         self.EOS = EOS
         self.PAD = PAD
 
-        self.src_embedding = TextEmbedding(vocab_size=self.src_vocab_size, d_model=d_model, seq_len=seq_len) #, padding_idx=PAD)
+        self.src_embedding = TextEmbedding(vocab_size=self.src_vocab_size, d_model=d_model, seq_len=seq_len)
         self.tgt_embedding = TextEmbedding(vocab_size=self.tgt_vocab_size, d_model=d_model, seq_len=seq_len, padding_idx=PAD)
-        self.encoder = nn.Sequential(*[SelfAttentionBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
-        self.decoder = nn.ModuleList([CrossAttentionBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
+        self.encoder = nn.Sequential(*[EncoderBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
+        self.decoder = nn.ModuleList([DecoderBlock(h=h, d_model=d_model, d_k=d_k, d_v=d_v, dropout=dropout) for _ in range(num_blocks)])
         self.mlp = MLP(input_dim=d_model, output_dim=self.tgt_vocab_size, hidden_dim=mlp_size, dropout=dropout)
 
     def forward(self, input):
@@ -46,8 +46,8 @@ class Transformer(nn.Module):
         src_context = self.encoder(src_emb)
 
         x = self.tgt_embedding(x)
-        for cab in self.decoder:
-            x = cab(x, src_context)
+        for decoder_block in self.decoder:
+            x = decoder_block(x, src_context)
 
         logits = self.mlp(x.view(B * L, self.d_model))
 
