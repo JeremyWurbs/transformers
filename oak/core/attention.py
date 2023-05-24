@@ -11,8 +11,8 @@ class Attention(nn.Module):
     Self-Attention:
     
     The attention mechanism is defined by the equation Z = softmax(Q @ K.transpose / sqrt(d_k)) @ V, where the
-    matrices Q, K and V are computed from an input, X, according to X @ W_q, X @ W_k, and X @ W_v. The three weight
-    matrices, W_q, W_k and W_v, are tunable parameters learned by the module during training. 
+    matrices Q, K and V are computed from an input, X, according to X @ W_Q, X @ W_K, and X @ W_V. The three weight
+    matrices, W_Q, W_K and W_V, are tunable parameters learned by the module during training. 
     
     Cross-Attention:
     
@@ -48,9 +48,9 @@ class Attention(nn.Module):
 
     Parameters
         The Attention module trains the following parameters:
-        W_q: Query weight matrix of dimension (d_model, d_k)
-        W_k: Key weight matrix of dimension (d_model, d_k)
-        W_v: Value weight matrix of dimension (d_model, d_v)
+        W_Q: Query weight matrix of dimension (d_model, d_k)
+        W_K: Key weight matrix of dimension (d_model, d_k)
+        W_V: Value weight matrix of dimension (d_model, d_v)
     """
 
     def __init__(self, d_model, d_k, d_v, mask=False):
