@@ -22,7 +22,7 @@ class Visualizer(nn.Module):
     def get_features(self, name):
         def hook(model, input, output):
             self._features[name] = output.detach().cpu()
-            if name.find('mhsa.head') >= 0:
+            if name.find('mha.head') >= 0:
                 model.forward(input[0], store_values=True)
                 self._features[name + '.Q'] = model.Q.detach().cpu()
                 self._features[name + '.K'] = model.K.detach().cpu()
@@ -44,7 +44,7 @@ class Visualizer(nn.Module):
             self.features['output'] = output.detach().cpu()
             for layer in self.layers:
                 self.features[layer] = self._features[layer].cpu()
-                if layer.find('mhsa.head') >= 0:
+                if layer.find('mha.head') >= 0:
                     self.features[layer + '.Q'] = self._features[layer + '.Q']
                     self.features[layer + '.K'] = self._features[layer + '.K']
                     self.features[layer + '.V'] = self._features[layer + '.V']
@@ -55,7 +55,7 @@ class Visualizer(nn.Module):
             self.features['output'] = torch.concat((self.features['output'], output.detach().cpu()), dim=0)
             for layer in self.layers:
                 self.features[layer] = torch.concat((self.features[layer], self._features[layer].cpu()), dim=0)
-                if layer.find('mhsa.head') >= 0:
+                if layer.find('mha.head') >= 0:
                     self.features[layer + '.Q'] = torch.concat((self.features[layer + '.Q'], self._features[layer + '.Q']), dim=0)
                     self.features[layer + '.K'] = torch.concat((self.features[layer + '.K'], self._features[layer + '.K']), dim=0)
                     self.features[layer + '.V'] = torch.concat((self.features[layer + '.V'], self._features[layer + '.V']), dim=0)

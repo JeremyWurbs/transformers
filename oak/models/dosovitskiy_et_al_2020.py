@@ -20,7 +20,7 @@ class ViTLarge(LightningModel):
 
 
 class ViTHuge(LightningModel):
-    """ViT Base as defined in Dosovitskiy et al. 2020"""
+    """ViT Huge as defined in Dosovitskiy et al. 2020"""
     def __init__(self, input_dim, num_classes, P):
         super().__init__(base_model=VisionTransformer(input_dim, num_classes,
                                                       P=P, h=16, num_blocks=32, d_model=1280, dropout=0., mlp_size=5120),

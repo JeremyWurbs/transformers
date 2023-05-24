@@ -2,9 +2,9 @@
 
 Oak is an educational package for implementing transformers, and is meant as a
 reference implementation for people looking to learn or implement their own
-transformer networks, as well as playing around with some of their dynamics.
+transformer models, as well as to play around with some of their dynamics.
 
-There are three main architectures covered:
+Here we implement what we consider the three core transformer architectures:
 1. **Transformer**, as in [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf)
 2. **GPT**, as in [Radford et al. 2018](https://www.cs.ubc.ca/~amuham01/LING530/papers/radford2018improving.pdf)
 3. **Vision Transformer**, as in [Dosovitskiy et al. 2020](https://arxiv.org/pdf/2010.11929.pdf)
@@ -32,26 +32,27 @@ Transformer (ViT). The main idea was to replace the text embedding module of the
 transformer with a patch embedding module, which takes in images and breaks them into a 
 grid of *patches*, which are then treated as if they were *words* in the original 
 transformer. These patches are then passed through a transformer encoder for image 
-classification. Other minor alterations, like the inclusion of class embedding tokens and
-learnable embeddings, are included in this repo.
+classification. We have also included the other minor alterations, such as the inclusion 
+of class embedding tokens and learnable embeddings.
 
 At their core, all transformer architectures are based on the 
 [Attention](./oak/core/attention.py) Module, which takes an input of dimensions 
 ($B$, $L$, $d_{model}$) and returns an embedding of dimensions ($B$, $L$, $d_v$), 
 where $d_v$ is usually set to $d_{model}$ in practice. The Attention Module is 
-based around using an Attention *Kernel* to compute an Attention *Matrix*. 
+based around using an Attention *Kernel*, $A(Q, K)$, to compute an Attention *Matrix*. 
 Common Attention kernels include,
 
-|            Kernel, $A(Q, K)$            |      Common Name      |                      Scientific Name (Citation)                      |
-|:---------------------------------------:|:---------------------:|:--------------------------------------------------------------------:|
-|             $cosine(Q, K)$              |   Cosine Similarity   |    Cosine Similarity ([Graves](https://arxiv.org/abs/1410.5401))     |
-|            $softmax(Q + K)$             |       Additive        |             [Bahdanau](https://arxiv.org/abs/1409.0473)              |
-|           $softmax(Q\cdot K)$           |    Multiplicative     |              [Luong](https://arxiv.org/abs/1508.04025)               |
-| $softmax(\frac{Q\cdot K^T}{sqrt{d_k}})$ | Scaled Multiplicative | Scaled Dot-Product ([Vaswani](https://arxiv.org/pdf/1706.03762.pdf)) |
+|                   Kernel                   |      Common Name      |                      Scientific Name (Citation)                      |
+|:------------------------------------------:|:---------------------:|:--------------------------------------------------------------------:|
+|           $A(Q, K)=cosine(Q, K)$           |   Cosine Similarity   |    Cosine Similarity ([Graves](https://arxiv.org/abs/1410.5401))     |
+|          $A(Q, K)=softmax(Q + K)$          |       Additive        |             [Bahdanau](https://arxiv.org/abs/1409.0473)              |
+|           $A(Q, K)=softmax(QK)$            |    Multiplicative     |              [Luong](https://arxiv.org/abs/1508.04025)               |
+| $A(Q, K)=softmax(\frac{QK^T}{\sqrt{d_k}})$ | Scaled Multiplicative | Scaled Dot-Product ([Vaswani](https://arxiv.org/pdf/1706.03762.pdf)) |
 
-In each case the Attention Kernel, $A(Q, K)$, computes the similarity between 
-the rows of two matrices, $Q$ and $K$, which it stores in another matrix called 
-the Attention Matrix, $A$. This Attention Matrix is used to weight the output 
+In each case the Attention Kernel computes a similarity metric between 
+the rows of two matrices, $Q$ and $K$. These similarity scores are then stored 
+in another matrix, aptly called the Attention Matrix, $A$. This Attention Matrix 
+is used to weight the output 
 of the Attention Module, $Z=AV$, where $Z$ is the output of the Attention 
 Module, and V is a matrix computed from the input, similarly to Q and K. That 
 is, explicitly, Q, K and V are computed from two input matrices, X and Y, as:
@@ -64,7 +65,7 @@ $V = Y\cdot W_V$
 
 where $W_Q$, $W_K$ and $W_V$ are tunable weight matrices learned via 
 backpropagation, and $X$ and $Y$ are the input matrices into the Attention 
-Module. The general case, where $X != Y$, is called Cross-Attention, and the
+Module. The general case, where $X \neq Y$, is called Cross-Attention, and the
 more common case, where $X = Y$ is called Self-Attention.
 
 In practice, each Attention Module is split into multiple *heads* that each
@@ -82,9 +83,10 @@ MHA Modules, each comprising $h$ Attention Modules.
 
 # Model Comparison
 
-Comparing the three models, the original transformer is actually the most complicated of 
-the models, as it includes both encoder and decoder portions of the network, tying them 
-together using cross-attention. Summarizing the major components of each:
+Comparing the three models, the original transformer is actually the most 
+complicated, as it includes both encoder and decoder portions of the network, 
+tying them together using cross-attention. Summarizing the major components of 
+each:
 
 |           | Transformer |       GPT        |         ViT          |
 |----------:|:-----------:|:----------------:|:--------------------:|
@@ -106,6 +108,49 @@ is also the most complicated, as seen below:
 | Masked-Attention |      x      |  x  |     |
 |  Cross-Attention |      x      |     |     |
 
+# Understanding the Transformer
+
+It is not immediately obvious *why* the Transformer and, by extension the
+Attention Module, work so well. But to begin the journey, we can try and
+get a sense of the important components and common strategies these architectures
+employ. 
+
+Note that in each of the three transformer models here, the model includes an 
+*Embedding Module*, which converts
+an input into the right dimensions for the model to handle, an *Encoder Module*,
+which contains the magic Attention Modules described above, and a *softmax* final
+layer, which turns whatever it is given into a probability distribution 
+predicting the next item to select from a list of items. 
+
+That is, the main transformer strategy is as follows:
+1. Transform your raw input into a set of $L$ related inputs, each of dimension
+$d_{model}$. The "related inputs" used here are words in a sentence or patches
+in an image, but the general premise will hold for any situation where the 
+individual inputs are correlated. You now have an $X$ of dimension ($L$, $d_{model}$).
+2. Pass your embedded input through a series of MHA blocks, each of which contain 
+a set of Attention modules, which in turn transform your input into something 
+*better* (while keeping its dimensions constant).
+3. When building your network, you need to have a set of items that your 
+model will choose between. For the models here, the Transformer and GPT models
+choose an output from a dictionary of tokens (i.e. words), which typically 
+contains a vocabulary of ~50k tokens; the ViT model classifies the input image
+as belonging to one of a set of classes. 
+
+While verbose, if you read through the strategy carefully, you will notice it
+reads similar to the following:
+1. Have an input.
+2. **Magic**.
+3. Pick the big number and profit.
+
+Much time and many papers have been spent on trying to explicate Step 2 above
+(there's always a *Step 2*). Ultimately, at this time it seems the best 
+strategy for trying to grasp the Magic of Transformers, is just to implement
+the equations yourself and start to play around with them. Then read, see what 
+others have done; implement some of their ideas and try to understand why they
+do or do not work; then start to have some ideas of your own that you can 
+implement and play around with. Then its rinse and repeat. No magic in trying
+to understand the magic, I'm afraid.
+
 # Package Components
 
 Oak is meant to be easily examined and hacked for your own purposes. As such, the 
@@ -122,17 +167,178 @@ seen below:
 
 ## Package Breakdown
 
-At the highest level, each transformer architecture is located in 
-[oak.transformers](./oak/transformers):
-1. Transformer, as in [oak.transformers.transformer](./oak/transformers/transformer.py)
-2. GPT, as in [oak.transformers.gpt](./oak/transformers/gpt.py)
-3. ViT, as in [oak.transformers.vision_transformer](./oak/transformers/vision_transformer.py)
+### Datasets ([oak.data](./oak/data))
+
+There are currently three datasets available to directly plug in to the models
+implemented here, which hopefully should serve as a guide for how to prepare
+further datasets of interest. The three datasets are relatively small and easy,
+at least as considering the amount of training time necessary to train the 
+supplied models to their tasks.
+
+The datasets are:
+1. [IWSLT 2017](./oak/data/iwslt.py). This dataset is a translation dataset, 
+consisting of matched sentence pairs between pairs of supported languages. 
+Refer to the [Transformer training script](./scripts/iwslt.py) to see a demo of
+its use.
+2. [Shakespeare](./oak/data/shakespeare.py). This dataset contains 40k lines of
+Shakespeare plays. Refer to the [GPT training script](./scripts/shakespeare.py)
+to see a demo of its use.
+3. [MNIST](./oak/data/mnist.py). This dataset contains 28x28 images of 
+handwritten digits. Refer to the [ViT training script](./scripts/mnist_train.py)
+to see a demo of its use.
+
+### Utils ([oak.utils](./oak/utils))
+
+There are a couple notable utilities used throughout this repo, all accessible
+at the top level Oak namespace. They are,
+
+1. [LightningModel](./oak/utils/lightning.py)— a PyTorch Lightning wrapper 
+for all of the models implemented in this repo. The models in this repo 
+are all implements as standard `torch.nn.Modules`, which we wrap in a 
+`pytorch_lightning.LightningModule` to simplify training. That is, you may
+train a model and view its progress on Tensorboard with:
+
+```python 
+from pytorch_lightning import Trainer
+from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
+
+from oak import LightningModel  # PyTorch Lightning Wrapper
+from oak.data import MNIST  # Note all datasets are implemented as Lightning DataModules
+from oak.transformers import VisionTransformer
+
+dm = MNIST()
+vit = VisionTransformer(**param)  # -> torch.nn.Module
+vit = LightningModel(vit)   # -> pytorch_lightning.LightningModule, can be passed into Trainer
+
+logger = TensorBoardLogger()
+trainer = Trainer(logger=logger)
+trainer.fit(vit, dm)
+trainer.test(vit, dm)
+```
+
+You may now launch Tensorboard from a terminal with, 
+
+```terminal
+tensorboard --logdir=./scripts
+```
+
+Opening a browser to the local host server, you should see something similar to the
+following:
+
+[MNIST Training Results](./resources/mnist_training_results.png)
+
+Note that at this time, the following Data-Model pairs are supported for training:
+
+|             | Transformer | GPT | ViT |
+|------------:|:-----------:|:---:|:---:|
+|  IWSLT 2017 |      x      |     |     |
+| Shakespeare |             |  x  |     |
+|       MNIST |             |     |  x  |
+
+2. [Tokenizer](./oak/utils/tokenizer.py) and [ShakespeareTokenizer](./oak/utils/shakespeare_tokenizer.py)— 
+tokenizers which can be used for all text-based models. The TextEmbedding 
+module requires that text be transformed from raw text into tokens; both the
+Tokenizer and ShakespeareTokenizer classes are interoperable with the 
+TextEmbedding class for this purpose. The ShakespeareTokenizer uses a char-level 
+tokenization of the Shakespeare dataset, while the Tokenizer class wraps OpenAI's 
+Whisper tokenizer with a few special tokens used to train the Transformer. By 
+default the Tokenizer class will use OpenAI's gpt2 tokenizer. 
+
+You may use a tokenizer as in the following:
+
+```python 
+from oak import Tokenizer
+
+tokenizer = Tokenizer()
+tokens = tokenizer('Hello there, friend!')
+print(f'{tokenizer.decode(tokens)}')  # 'Hello there, friend!'
+```
+3. [Visualizer](./oak/utils/visualizer.py)— the Visualizer class is a wrapper 
+for any nn.Module. When instantiated pass in a nn.Module and a list of module 
+names. The Visualizer may then be called as if it were the original model, only
+now it will store the output of the internal modules given when instantiated, 
+well as the computed $Q$, $K$, $V$, and $A$ matrices for each Attention module
+listed.
+
+For example,
+
+```python
+from oak import MNIST, Visualizer, VisionTransformer
+
+dm = MNIST()
+vit = VisionTransformer(**param)
+visualizer = Visualizer(vit, layers=['embedding', 'blocks.0.mha.heads.0','blocks.0.mha.heads.0'])
+
+image = dm.test[0]
+pred = visualizer(image)
+```
+
+At the end of the code block above, the visualizer now holds a copy of the 
+embedding outputs, as well as $Q$, $K$, $V$ and $A$ values for the two listed 
+attention heads. These feature vectors can be found in `visualizer._features`,
+but they are meant to be viewed through one of the visualizers further PCA or
+plotting methods. For example, we may plot the PCA of the stored features with
+
+```python 
+visualizer.PCA_scatter(layers=['input', 'model.blocks.0.mha.heads.0', 'model.blocks.0.mha.heads.1', 'output'], k=3, embed_index=0)
+```
+which will yield the following plots:
+
+[Visualizer Demo Plots]()
+
+Refer to the [visualizer demo](./scripts/visualizer.py) to recreate the above 
+plots, or [visualizer training demo](./scripts/training_visualizer.py)) for 
+a more advanced usage.
+
+
+### Transformers ([oak.transformers](./oak/transformers))
+At the highest level, each transformer architecture can be imported from the 
+transformers module:
+
+```python 
+from oak.transfomers import Transformer, GPT, VisionTransformer
+```
+
+That is, you can look through their class implementations here: 
+[Transformer](./oak/transformers/transformer.py), [GPT](./oak/transformers/gpt.py), 
+and [VisionTransformer](./oak/transformers/vision_transformer.py).
+
+### Embeddings ([oak.embeddings](./oak/embeddings))
 
 Each of these models combines an embedding module (either a 
 [text embedding module](./oak/embeddings/text_embedding.py) or an 
 [image embedding module](./oak/embeddings/image_embedding.py)), an encoder comprising one 
 or more [encoder blocks](./oak/core/encoder_block.py) and, optionally, a decoder comprising 
 one or more [decoder blocks](./oak/core/decoder_block.py).
+
+The text and image embeddings can be imported from the embeddings module:
+
+```python 
+from oak.embeddings import TextEmbedding, ImageEmbedding
+```
+
+### Core ([oak.core](./oak/core))
+
+
+
+The key component of the encoder and decoder blocks is the Attention Module. As 
+discussed above, the Attention Module is actually split into an 
+[Attention](./oak/core/attention.py) class, which implements the equations 
+desribed above, and a [MultiHeadAttention](./oak/core/mha.py) class, which splits 
+the input into $h$ different Attention heads and passes their concatenated 
+outputs onto the next block.
+
+If you look at the architecture diagrams above, you will notice references to
+*Feed Forward* and *MLP* layers. The implementations used by the original
+papers are effectively interchangeable here, and so we implement the ViT MLP 
+version in its own [MLP](./oak/core/mlp.py) class, reusing
+it for all three transformer architectures for simplicity.
+
+All core components can be imported from the Oak level namespace itself:
+
+```python
+from oak import Attention, MultiHeadAttention, MLP, EncoderBlock, DecoderBlock
+```
 
 # Reference Notation
 Oak uses the following convention throughout:

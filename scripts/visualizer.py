@@ -21,6 +21,6 @@ trainer = Trainer(max_epochs=1, check_val_every_n_epoch=1)
 trainer.fit(model, dm)
 trainer.test(model, dm)
 
-visualizer = Visualizer(model, layers=['model.embedding', 'model.blocks.0.mhsa.heads.0', 'model.blocks.0.mhsa.heads.1'])
+visualizer = Visualizer(model, layers=['model.embedding', 'model.blocks.0.mha.heads.0', 'model.blocks.0.mha.heads.1'])
 visualizer.collect_features(dm.test_dataloader())
-visualizer.PCA_scatter(layers=['input', 'model.blocks.0.mhsa.heads.0', 'model.blocks.0.mhsa.heads.1', 'output'], k=3, embed_index=0)
+visualizer.PCA_scatter(layers=['input', 'model.blocks.0.mha.heads.0', 'model.blocks.0.mha.heads.1', 'output'], k=3, embed_index=0)
