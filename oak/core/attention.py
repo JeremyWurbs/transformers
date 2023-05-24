@@ -24,12 +24,12 @@ class Attention(nn.Module):
     Masked Attention:
     
     If the argument `mask` is set to True, masked-attention will be computed. Masked attention assumes there is an 
-    ordering of the L elements of X, such that earlier elements should not be allowed access to use later elements. 
-    E.g. if the elements of X are words in a sentence, and the network is supposed to learn to predict later words, 
-    then those words should not be given during training. If masked attention is used, the output will have the 
-    same dimensions, (B, L, d_model), but here the output[:, 0, :] values will only be computed using X[:, 0, :], 
-    output[:, 1, :] will be computed only using X[:, 0:2, :] (note 0:2 here means 0 and 1), output[:, 2, :] using 
-    X[:, 0:3, :], etc etc.
+    ordering of the L elements of X, such that earlier elements should not be allowed access to view or use later 
+    elements. E.g. if the elements of X are words in a sentence, and the network is supposed to learn to predict 
+    later words, then those words should not be given during training. If masked attention is used, the output 
+    will have the same dimensions, (B, L, d_model), but here the output[:, 0, :] values will only be computed 
+    using X[:, 0, :], output[:, 1, :] will be computed only using X[:, 0:2, :] (note 0:2 here means 0 and 1), 
+    output[:, 2, :] using X[:, 0:3, :], etc etc.
     
     Cross-attention is never used with a mask in either Vaswani et al. 2017 (the original transformer paper) or 
     Dosovitskiy et al. 2020 (the original visual transformer paper), and so it is not used in this repository
