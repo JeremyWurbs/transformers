@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from oak import TextEmbedding, SelfAttentionBlock, MLP
 
 
-class NLPTransformer(nn.Module):
+class GPT(nn.Module):
     def __init__(self, seq_len, num_blocks, vocab_size, h, d_model, d_k=None, d_v=None, dropout=0., mlp_size=None, **_):
         super().__init__()
 
@@ -38,15 +38,18 @@ class NLPTransformer(nn.Module):
         return logits
 
     def generate(self, context, max_new_tokens):
-        context = context.to(self.embedding.token_enc.weight.device)
+        with torch.no_grad():
+            self.eval()
 
-        for _ in range(max_new_tokens):
-            B, L = context.shape
-            x = context[:, -self.seq_len:]  # crop the input context to fit within our sequence length
-            logits = self.forward(x).view(B, min(self.seq_len, L), self.vocab_size)[:, -1, :]
-            probs = F.softmax(logits, dim=-1)
-            next_pred = torch.multinomial(probs, num_samples=1)
-            context = torch.cat((context, next_pred), dim=1)
+            context = context.to(self.embedding.token_enc.weight.device)
+
+            for _ in range(max_new_tokens):
+                B, L = context.shape
+                x = context[:, -self.seq_len:]  # crop the input context to fit within our sequence length
+                logits = self.forward(x).view(B, min(self.seq_len, L), self.vocab_size)[:, -1, :]
+                probs = F.softmax(logits, dim=-1)
+                next_pred = torch.multinomial(probs, num_samples=1)
+                context = torch.cat((context, next_pred), dim=1)
 
         return context
 
