@@ -21,9 +21,10 @@ class TextEmbedding(nn.Module):
         d_model: model size (a free parameter defined by the Transformer architecture)
         positional_encoding: whether to use positional encodings
         seq_len: sequence length, L; required only if positional_encoding is set to True
+        padding_idx: padding token id; this embedding id will return all zeros and have its gradients turned off
     """
 
-    def __init__(self, vocab_size, d_model, seq_len=None, positional_encoding=True):
+    def __init__(self, vocab_size, d_model, seq_len=None, positional_encoding=True, padding_idx=None):
         if positional_encoding is True:
             assert seq_len is not None, 'Sequence length must be given to use positional encoding'
 
@@ -32,7 +33,7 @@ class TextEmbedding(nn.Module):
         self.d_model = d_model
         self.seq_len = seq_len
 
-        self.token_enc = nn.Embedding(vocab_size, d_model)
+        self.token_enc = nn.Embedding(vocab_size, d_model, padding_idx=padding_idx)
         self.pos_enc = nn.Embedding(seq_len, d_model) if positional_encoding else None
 
     def forward(self, tokens):
