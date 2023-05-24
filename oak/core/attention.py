@@ -47,7 +47,7 @@ class Attention(nn.Module):
         L: sequence length; equal to the number of words or patches (plus one for the class token, if used)
 
     Parameters
-        The AttentionHead module trains the following parameters:
+        The Attention module trains the following parameters:
         W_q: Query weight matrix of dimension (d_model, d_k)
         W_k: Key weight matrix of dimension (d_model, d_k)
         W_v: Value weight matrix of dimension (d_model, d_v)
