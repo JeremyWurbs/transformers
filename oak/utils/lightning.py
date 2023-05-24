@@ -71,3 +71,16 @@ class LightningModel(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
         return optimizer
+
+
+class CrossAttentionLightningModel(LightningModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _step(self, batch, step_type):
+        x, y, labels = batch
+        logits = self.forward((x, y))
+        loss = self.loss(logits, labels.view(-1))
+        self.log(f'{step_type}_loss_step', loss, sync_dist=True, prog_bar=True)
+        self.log(f'{step_type}_acc_step', self.accuracy_metrics[step_type].to(x.device)(logits, y.view(-1)), sync_dist=True, prog_bar=True)
+        return loss
