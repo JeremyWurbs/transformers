@@ -28,7 +28,7 @@ class MultiHeadAttention(nn.Module):
     
     In either case, following Vaswani et al. 2017, we actually add a linear layer after the attention head 
     computations, which will convert (B, L, h*d_v) to (B, L, d_model), allowing you to use different, non-matching 
-    d_model, h and d_v hyperparameters.
+    d_model, h and d_v hyperparameters if you wish.
 
     Cross-Attention:
 
