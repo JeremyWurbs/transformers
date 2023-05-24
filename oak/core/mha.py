@@ -7,7 +7,7 @@ from oak import Attention
 class MultiHeadAttention(nn.Module):
     """Multi-head Attention Module
 
-    Takes an input of dimensions (B, L, d_model) and returns an embedding of dimension (B, L, h*d_v).
+    Takes an input of dimensions (B, L, d_model) and returns an embedding of dimension (B, L, d_model).
 
     Multi-head attention (MHA) breaks the input embeddings into h pieces, passing each piece into h different attention
     head modules, before concatenating the output of each attention head back into a single output embedding. That is,
@@ -22,9 +22,13 @@ class MultiHeadAttention(nn.Module):
             Z = concat(Attention1(X_1) -> (B, L, d_v), Attention2(X_2) -> (B, L, d_v)) -> (B, L, 2*d_v)
 
     Note that the last dimension of the MHA output is then h * d_v, and NOT just d_v, as in simple attention. In order
-    to output the same dimensions as the input, it is common to set d_v = d_model/h, such that the result will be
-    (B, L, d_model) -> MHA -> (B, L, d_model), enabling the output of one MHA block to directly feed into another with
-    the same d_model hyperparameter.
+    to output the same dimensions as the input, as well as maintain the dimensionality of the model throughout, it is 
+    common to set d_v = d_model/h, such that the result will be (B, L, d_model) -> MHA -> (B, L, d_model), enabling 
+    the output of one MHA block to directly feed into another with the same d_model hyperparameter. 
+    
+    In either case, following Vaswani et al. 2017, we actually add a linear layer after the attention head 
+    computations, which will convert (B, L, h*d_v) to (B, L, d_model), allowing you to use different, non-matching 
+    d_model, h and d_v hyperparameters.
 
     Cross-Attention:
 
@@ -60,7 +64,7 @@ class MultiHeadAttention(nn.Module):
         self.dropout = dropout
 
         self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v, mask=mask) for _ in range(h)])
-        self.linear = nn.Linear(d_model, d_model)
+        self.linear = nn.Linear(h*d_v, d_model)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, X, Y=None):
@@ -76,5 +80,5 @@ class MultiHeadAttention(nn.Module):
             Y = Y.view(B, L_Y, self.h, self.d_model // self.h)  # (B, L_Y, d_model) -> (B, L_Y, h, d_head)
             Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2), Y[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
 
-        Z = self.dropout(self.linear(Z))
+        Z = self.dropout(self.linear(Z))  # (B, L, h*d_v) -> (B, L, d_model)
         return Z
