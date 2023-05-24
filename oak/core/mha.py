@@ -71,13 +71,13 @@ class MultiHeadAttention(nn.Module):
         B, L, d_model = X.shape
 
         if Y is None:  # Self-Attention
-            X = X.view(B, L, self.h, self.d_model // self.h)  # (B, L, d_model) -> (B, L, h, d_head)
+            X = X.view(B, L, self.h, self.d_head)  # (B, L, d_model) -> (B, L, h, d_head)
             Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
 
         else:  # Cross-Attention
             _, L_Y, _ = Y.shape
-            X = X.view(B, L, self.h, self.d_model // self.h)  # (B, L, d_model) -> (B, L, h, d_head)
-            Y = Y.view(B, L_Y, self.h, self.d_model // self.h)  # (B, L_Y, d_model) -> (B, L_Y, h, d_head)
+            X = X.view(B, L, self.h, self.d_head)  # (B, L, d_model) -> (B, L, h, d_head)
+            Y = Y.view(B, L_Y, self.h, self.d_head)  # (B, L_Y, d_model) -> (B, L_Y, h, d_head)
             Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2), Y[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
 
         Z = self.dropout(self.linear(Z))  # (B, L, h*d_v) -> (B, L, d_model)
