@@ -43,7 +43,7 @@ class NLPTransformer(nn.Module):
         for _ in range(max_new_tokens):
             B, L = context.shape
             x = context[:, -self.seq_len:]  # crop the input context to fit within our sequence length
-            logits = self.forward(x).view(B, L, self.vocab_size)[:, -1, :]
+            logits = self.forward(x).view(B, min(self.seq_len, L), self.vocab_size)[:, -1, :]
             probs = F.softmax(logits, dim=-1)
             next_pred = torch.multinomial(probs, num_samples=1)
             context = torch.cat((context, next_pred), dim=1)

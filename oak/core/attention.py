@@ -46,11 +46,12 @@ class Attention(nn.Module):
         nn.init.xavier_uniform_(self.W_K)
         nn.init.xavier_uniform_(self.W_V)
 
-    def forward(self, X, store_values=False):
+    def forward(self, X, Y=None, store_values=False):
         B, L, d_model = X.shape
+        Y = X if Y is None else Y
         Q = X @ self.W_Q  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
-        K = X @ self.W_K  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
-        V = X @ self.W_V  # (B, L, d_model) @ (d_model, d_v) -> (B, L, d_v)
+        K = Y @ self.W_K  # (B, L, d_model) @ (d_model, d_k) -> (B, L, d_k)
+        V = Y @ self.W_V  # (B, L, d_model) @ (d_model, d_v) -> (B, L, d_v)
 
         dot_product = Q @ K.transpose(-2, -1) * self.d_k ** -0.5
         if self.use_mask:
