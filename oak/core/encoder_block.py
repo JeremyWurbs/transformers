@@ -4,10 +4,8 @@ from oak import MultiHeadAttention, MLP
 
 
 class EncoderBlock(nn.Module):
-    """Encoder Block
+    """A single encoder block, as defined in Vaswani et al. 2017"""
 
-    This module is a single encoder block, as defined in Vaswani et al. 2017.
-    """
     def __init__(self, h, d_model, d_k, d_v, dropout=0., mask=False):
         super().__init__()
 
