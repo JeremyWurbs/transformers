@@ -380,7 +380,7 @@ If you run `visualizer.PCA_scatter()` before and after training, it will yield t
 
 Here each dot is an input image, colored by which of the ten digit classes it 
 belongs to. Each individual plot shows the representation of every image in
-the MNIST test set. Here the general look of the PCA plots for the inputs and 
+the MNIST test set. The general look of the PCA plots for the inputs and 
 outputs are as we might expect— the input PCA plots do not change at all, while the 
 PCA plot for the output starts out fairly randomized (though with some correlations
 still clearly present), while by the end of training the output PCA is highly
