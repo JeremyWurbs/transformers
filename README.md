@@ -13,6 +13,20 @@ Oak used much of Andrej Karpathy's [nanoGPT](https://github.com/karpathy/nanoGPT
 reference implementation itself, which is also a great place to start learning the 
 transformer architecture. 
 
+# Package Components
+
+Oak is meant to be easily examined and hacked for your own purposes. As such, the 
+individual package components map directly onto the original architecture diagrams, as 
+seen below:
+
+## Transformer and Generative Pre-Trained (GPT)
+
+![Package Components](./resources/transformer_package_components.png)
+
+## Vision Transformer (ViT)
+
+![ViT Package Components](./resources/vit_package_components.png)
+
 # Transformers
 
 [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf) introduced the Transformer
@@ -379,21 +393,7 @@ blocks.1              : <class 'oak.core.encoder_block.EncoderBlock'>
 ...                   : ...
 ```
 
-# Package Components
-
-Oak is meant to be easily examined and hacked for your own purposes. As such, the 
-individual package components map directly onto the original architecture diagrams, as 
-seen below:
-
-## Transformer and Generative Pre-Trained (GPT)
-
-![Package Components](./resources/transformer_package_components.png)
-
-## Vision Transformer (ViT)
-
-![ViT Package Components](./resources/vit_package_components.png)
-
-## Package Breakdown
+# Package Breakdown
 
 ### Embeddings
 
