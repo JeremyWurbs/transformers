@@ -88,7 +88,7 @@ class Visualizer(nn.Module):
             if layer == 'labels':
                 continue
 
-            if layer.find('mhsa') >= 0 or layer.find('embedding') >= 0:
+            if layer.find('mha') >= 0 or layer.find('embedding') >= 0:
                 B, L, d_ = features[layer].shape
                 if embed_index is None:
                     f = features[layer].view(B * L, d_).float()
@@ -126,7 +126,7 @@ class Visualizer(nn.Module):
             else:
                 fig, ax = plt.subplots()
             labels = features['labels'].cpu()
-            if f.shape[0] != labels.shape[0]:  # e.g. if we are in an embedding or mhsa layer
+            if f.shape[0] != labels.shape[0]:  # e.g. if we are in an embedding or mha layer
                 d_ = f.shape[0] // labels.shape[0]
                 labels = labels.repeat_interleave(repeats=d_, dim=0)
             if k == 2:

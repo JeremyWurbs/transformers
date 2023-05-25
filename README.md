@@ -209,7 +209,7 @@ tensorboard --logdir=./scripts
 Opening a browser to the local host server, you should see something similar to the
 following:
 
-![MNIST Training Results](./resources/mnist_training_results.png)
+![MNIST Training Image](./resources/mnist_training_results.png)
 
 Refer to the individual training scripts for working parameter values and details.
 
@@ -341,24 +341,77 @@ from oak import Visualizer
 from oak.data import MNIST
 from oak.transformers import VisionTransformer
 
+param = {
+    'input_dim': [1, 28, 28],
+    'num_classes': 10,
+    'num_blocks': 2,
+    'P': 14,
+    'h': 2,
+    'd_model': 64
+}
+
 dm = MNIST()
 vit = VisionTransformer(**param)
-visualizer = Visualizer(vit, layers=['embedding', 'blocks.0.mha.heads.0','blocks.0.mha.heads.0'])
+visualizer = Visualizer(vit, layers=['model.blocks.0.mha.heads.0', 
+                                     'model.blocks.0.mha.heads.1', 
+                                     'model.blocks.1.mha.heads.0', 
+                                     'model.blocks.1.mha.heads.1'])
 
 visualizer.collect_features(dm.test)  # Computes and stores features for given layers over the entire dataset
-visualizer.PCA_scatter(layers=['blocks.0.mha.heads.0', 'blocks.0.mha.heads.1'])
+visualizer.PCA_scatter(layers=['input', 
+                               'model.blocks.0.mha.heads.0', 
+                               'model.blocks.0.mha.heads.1', 
+                               'model.blocks.1.mha.heads.0', 
+                               'model.blocks.1.mha.heads.1', 
+                               'output'])
 ```
 
-Which will yield the following plots:
+If you run `visualizer.PCA_scatter()` before and after training, it will yield the following plots:
 
-[Visualizer Demo Plots]()
 
-Refer to the [visualizer demo](./scripts/visualizer.py) to recreate the above 
-plots, or the [visualizer training demo](./scripts/training_visualizer.py) for 
+|                           Pre-Training                           |                         Post-Training                         |
+|:----------------------------------------------------------------:|:-------------------------------------------------------------:|
+|    ![Pretrained Input](./resources/pretrained_input_pca.png)     | ![MNIST Training Results](./resources/trained_input_pca.png)  |
+| ![Pretrained B0 H0](./resources/pretrained_block0_head0_pca.png) |  ![Trained B0 H0](./resources/trained_block0_head0_pca.png)   |
+| ![Pretrained B0 H1](./resources/pretrained_block0_head1_pca.png) |  ![Trained B0 H1](./resources/trained_block0_head1_pca.png)   |
+| ![Pretrained B1 H0](./resources/pretrained_block1_head0_pca.png) |  ![Trained B1 H0](./resources/trained_block1_head0_pca.png)   |
+| ![Pretrained B1 H1](./resources/pretrained_block1_head1_pca.png) |  ![Trained B1 H1](./resources/trained_block1_head1_pca.png)   |
+|   ![Pretrained Output](./resources/pretrained_output_pca.png)    | ![MNIST Training Results](./resources/trained_output_pca.png) |
+
+Here each dot is an input image, colored by which of the ten digit classes it 
+belongs to. Each individual plot shows the representation of every image in
+the MNIST test set. Of course the PCA plots for the inputs and outputs are to 
+expected-- the input PCA plots do not change, while the output PCA plots start
+fairly randomized at the start of training and are highly clustered after training.
+What is more interesting, however, is the specialization exhibited by 
+individual attention heads as processing passes through the network.
+
+For example, in the first MHA block (i.e. `block 0`), `head 0` seems to become
+specialized in representing features that cluster the digit 6, while those
+same features are almost completely unhelpful in clustering 3's. The second 
+attention head (`head 1`), however, exhibits the exact opposite behavior,
+learning features that seem useful for clustering 3's, while being much less
+helpful for clustering 6's.
+
+This trend is transferred through blocks. That is, in the second MHA block
+(i.e. `block 1`), the first `head 0` still seems helpless in helping to 
+identify 3's, while even better at identifying 6's, as well as other digits.
+The second head, `head 1`, is likewise still poor at identifying 6's, while
+even better than the first block at identifying 3's. 
+
+Note that this behavior is somewhat expected, as even though there is an MLP
+layer between the individual blocks, which will spread information between 
+the heads, it is still the case that the representations are likely to be 
+highly correlated between aligned heads. 
+
+For explicit implementation details, refer to the 
+[visualizer demo](./scripts/visualizer.py) to recreate the above plots, or the 
+[visualizer training demo](./scripts/training_visualizer.py) for 
 a more advanced usage.
 
 Also note, to determine the available layer names, you can print the names for 
-all the modules in your model with:
+all the modules in your model with the following.
+
 ```python 
 from oak.transformers import VisionTransformer
 vit = VisionTransformer(**param)
@@ -367,7 +420,9 @@ for name, module in vit.named_modules():
     print(f'{name:22}: {type(module)}')
 ```
 
-which will print out a long list, similar to:
+which will print out a long list, similar to the following. Of particular note 
+are the Attention modules (e.g. `blocks.0.mha.heads.0`), as these will have the 
+$Q$, $K$, and $V$ values you may be most interested in.
 
 ```text 
 embedding             : <class 'oak.embeddings.image_embedding.ImageEmbedding'>
