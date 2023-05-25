@@ -195,7 +195,7 @@ tensorboard --logdir=./scripts
 Opening a browser to the local host server, you should see something similar to the
 following:
 
-[MNIST Training Results](./resources/mnist_training_results.png)
+![MNIST Training Results](./resources/mnist_training_results.png)
 
 Refer to the individual training scripts for working parameter values and details.
 
