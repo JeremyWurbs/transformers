@@ -199,6 +199,118 @@ following:
 
 Refer to the individual training scripts for working parameter values and details.
 
+## GPT
+
+Similar to GPT-3 and ChatGPT, the eponymous GPT is a language model, meaning 
+it will generate text iteratively, for as long as desired. We can train a 
+GPT model analogously to the above, but unlike a ViT, which simply classifies
+an image as a particular class, GPT contains an additional *generate* method,
+which will generate new text. The generate method may optionally be prompted, 
+which is to say, may be given the beginning of the text to 
+generate, which it will then attempt to continue.
+
+Refer to the Shakespeare training sample for details, but if we train a GPT 
+model on Shakespeare text, which looks like:
+
+```text 
+ROMEO:
+Is the day so young?
+
+BENVOLIO:
+But new struck nine.
+
+ROMEO:
+Ay me! sad hours seem long.
+Was that my father that went hence so fast?
+
+BENVOLIO:
+It was. What sadness lengthens Romeo's hours?
+
+ROMEO:
+Not having that, which, having, makes them short.
+
+BENVOLIO:
+In love?
+
+ROMEO:
+Out--
+
+BENVOLIO:
+Of love?
+
+ROMEO:
+Out of her favour, where I am in love.
+```
+At first, when randomly initialized, GPT will generate text that looks like
+the following:
+```text
+xywrfzXA,Gp.cNpU':FVAcS:MRgJFaMCctUXmngW?wrojaW:-ukUqGTdvs fuQctwj:Ljdz
+KStZqmSGCjnw-oTSw.VIugLSAHc3wtbjWHDqQ:uHd-XCxdqHoptq;R-
+NHRnWuYaYOVC,eVT
+ZTDBexvtorr&czSu!BSMnFTQiRLJ !A&SxMoCcUHW??P
+TcIZs?xGQB$gKJkupuivSv.OYhN'vhA$iKxkLcngeq-Vz.c fQB:qY'.b3urwGDZXZt
+```
+
+After a few minutes of training on the Shakespeare corpus, however, it 
+will subsequently generate text similar to:
+
+```text
+Being when the ground doing.
+
+DUKE OF YORK:
+I am judge at my heart be had,
+And dared at hope of my wood:
+Fear me, my Norfolk, he right, and unfold.
+In London as issue the right.
+
+Passage sweet Richard!
+Richard, we must night to accept the wain
+Of dyi
+```
+Clearly much better.
+
+It is true that when reading the above text it is clear that this 
+simple GPT model, trained for only a few minutes on a small dataset of 
+40k lines of Shakespeare is speaking gibberish. Still, it is clear that 
+the model is learning and, actually, considering it is using a simple 
+character-level tokenizer and not using any pre-trained weights, is pretty 
+good. 
+
+If we switch out the character-level tokenizer for GPT-2's tokenizer, we 
+can get longer sequences of sensibleness, if not admittedly still gibberish 
+overall.
+
+```text
+JULIET:
+I'll kiss by and wilt thou be gone,--
+
+ROMEO:
+I doubt it, if thou leave me not the thing if the lark,
+That monthly changes in thy rotten jaws to open,
+Then be the god of my idol:
+Nurse and my soul, so happy days.
+
+ROMEO:
+What wilt thou, nurse? and find I
+Or if thou as I do find there?
+By love me? I love thee better thing when the word:
+Nay, if thou love me see any is as true love,
+And all when thou love me as true love, should.
+My love, fair saint, my love! I love think's ghostly,
+Thou mayst think is on it not?
+
+TYBALT:
+O,Your love till Thursday; all:
+But Montague shall have no time enough.
+
+ROMEO:
+O, then I should they say is so?
+
+BENVOLIO:
+In those that the prince thou hast done, that when
+In all this shall scorn me.
+```
+
 ## Visualizer
 
 If you wish to look inside each model and see how the inputs are transformed, 
