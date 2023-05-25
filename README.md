@@ -396,16 +396,11 @@ attention head (`head 1`), however, exhibits the exact opposite behavior,
 learning features that seem useful for clustering 3's, while being much less
 helpful for clustering 6's.
 
-This trend is transferred through blocks. That is, in the second MHA block
-(i.e. `block 1`), the first `head 0` still seems helpless in helping to 
-identify 3's, while even better at identifying 6's, as well as other digits.
-The second head, `head 1`, is likewise still poor at identifying 6's, while
-even better than the first block at identifying 3's. 
-
-Note that this behavior is somewhat expected, as even though there is an MLP
-layer between the individual blocks, which will spread information between 
-the heads, it is still the case that the representations are likely to be 
-highly correlated between aligned heads. 
+In this case, this trend appears to transfer through blocks. That is, in the 
+second MHA block (i.e. `block 1`), the first `head 0` still seems helpless in 
+helping to identify 3's, while even better at identifying 6's, as well as other 
+digits. The second head, `head 1`, is likewise still poor at identifying 6's, 
+while even better than the first block at identifying 3's. 
 
 For explicit implementation details, refer to the 
 [visualizer demo](./scripts/visualizer.py) to recreate the above plots, or the 
