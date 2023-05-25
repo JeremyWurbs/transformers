@@ -52,9 +52,9 @@ of class embedding tokens and learnable embeddings.
 At their core, all transformer architectures are based on the 
 [Attention](./oak/core/attention.py) Module, which takes an input of dimensions 
 ($B$, $L$, $d_{model}$) and returns an embedding of dimensions ($B$, $L$, $d_v$), 
-where $d_v$ is usually set to $d_{model}$ in practice. The Attention Module is 
-based around using an Attention *Kernel*, $A(Q, K)$, to compute an Attention *Matrix*. 
-Common Attention kernels include,
+where $d_v$ is usually set to $d_{model}$ in practice (or, equivalently, $d_{model} / h$ 
+for multi-head attention). The Attention Module is based around using an Attention 
+*Kernel*, $A(Q, K)$, to compute an Attention *Matrix*. Common Attention kernels include,
 
 |                   Kernel                   |      Common Name      |                      Scientific Name (Citation)                      |
 |:------------------------------------------:|:---------------------:|:--------------------------------------------------------------------:|
