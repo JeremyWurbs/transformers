@@ -269,9 +269,9 @@ Of dyi
 ```
 Clearly much better.
 
-It is true that when reading the above text it is clear that this 
+It is true that this 
 simple GPT model, trained for only a few minutes on a small dataset of 
-40k lines of Shakespeare is speaking gibberish. Still, it is clear that 
+40k lines of Shakespeare, is speaking gibberish. Still, it is clear that 
 the model is learning and, actually, considering it is using a simple 
 character-level tokenizer and not using any pre-trained weights, is pretty 
 good. 
