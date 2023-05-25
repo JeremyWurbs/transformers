@@ -402,12 +402,18 @@ helping to identify 3's, while even better at identifying 6's, as well as other
 digits. The second head, `head 1`, is likewise still poor at identifying 6's, 
 while even better than the first block at identifying 3's. 
 
-For explicit implementation details, refer to the 
+In general, the amount of specialization of each head, and their correlations
+across blocks, is an open research question. The story is unfortunately not so
+simple to understand, and will vary from task to task and explicit 
+implementation details.
+
+For explicit implementation details of this case, however, refer to the 
 [visualizer demo](./scripts/visualizer.py) to recreate the above plots, or the 
 [visualizer training demo](./scripts/training_visualizer.py) for 
 a more advanced usage.
 
-Also note, to determine the available layer names, you can print the names for 
+Also note, to determine the available layer names, which you may pass into the
+Visualizer to track intermediate values for you, you can print the names for 
 all the modules in your model with the following.
 
 ```python 
