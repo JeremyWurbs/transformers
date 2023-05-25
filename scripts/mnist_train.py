@@ -3,7 +3,9 @@ import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 
-from oak import MNIST, VisionTransformer, LightningModel
+from oak import LightningModel
+from oak.data import MNIST
+from oak.transformers import VisionTransformer
 
 #torch.set_float32_matmul_precision('medium')
 

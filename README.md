@@ -151,6 +151,122 @@ do or do not work; then start to have some ideas of your own that you can
 implement and play around with. Then its rinse and repeat. No magic in trying
 to understand the magic, I'm afraid.
 
+# Using Oak
+
+## Training Sample
+
+Each implemented architecture comes with a dataset that can be used to train it.
+At this time, the following Data-Model pairs are supported for training:
+
+|             | Transformer | GPT | ViT |
+|------------:|:-----------:|:---:|:---:|
+|  IWSLT 2017 |      x      |     |     |
+| Shakespeare |             |  x  |     |
+|       MNIST |             |     |  x  |
+
+Each of the architectures are implemented as standard `torch.nn.Modules`. All
+of the code to train them is placed into a `pytorch_lightning.LightningModule`,
+which you can wrap around the original models for easy training. That is, to
+train a new model:
+
+```python 
+from pytorch_lightning import Trainer
+from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
+
+from oak import LightningModel  # PyTorch Lightning Wrapper
+from oak.data import MNIST  # Note all datasets are implemented as pytorch_lightning.DataModules
+from oak.transformers import VisionTransformer
+
+dm = MNIST()
+vit = VisionTransformer(**param)  # -> torch.nn.Module
+vit = LightningModel(vit)   # -> pytorch_lightning.LightningModule, can be passed into Trainer
+
+trainer = Trainer(logger=TensorBoardLogger())
+trainer.fit(vit, dm)
+trainer.test(vit, dm)
+```
+
+You may now launch Tensorboard from a terminal with, 
+
+```terminal
+tensorboard --logdir=./scripts
+```
+
+Opening a browser to the local host server, you should see something similar to the
+following:
+
+[MNIST Training Results](./resources/mnist_training_results.png)
+
+Refer to the individual training scripts for working parameter values and details.
+
+## Visualizer
+
+If you wish to look inside each model and see how the inputs are transformed, 
+you can also use the provided Visualizer class, which accepts a list of layer
+names when instantiated and will add hooks for these layers during inference
+time to save their intermediate values. There are associated helper methods to 
+store the intermediate values for an entire dataset, compute the resulting PCA 
+components for these layer representations and plot the results.
+
+For example,
+
+```python
+from oak import Visualizer
+from oak.data import MNIST
+from oak.transformers import VisionTransformer
+
+dm = MNIST()
+vit = VisionTransformer(**param)
+visualizer = Visualizer(vit, layers=['embedding', 'blocks.0.mha.heads.0','blocks.0.mha.heads.0'])
+
+visualizer.collect_features(dm.test)  # Computes and stores features for given layers over the entire dataset
+visualizer.PCA_scatter(layers=['blocks.0.mha.heads.0', 'blocks.0.mha.heads.1'])
+```
+
+Which will yield the following plots:
+
+[Visualizer Demo Plots]()
+
+Refer to the [visualizer demo](./scripts/visualizer.py) to recreate the above 
+plots, or the [visualizer training demo](./scripts/training_visualizer.py) for 
+a more advanced usage.
+
+Also note, to determine the available layer names, you can print the names for 
+all the modules in your model with:
+```python 
+from oak.transformers import VisionTransformer
+vit = VisionTransformer(**param)
+
+for name, module in vit.named_modules():
+    print(f'{name:22}: {type(module)}')
+```
+
+which will print out a long list, similar to:
+
+```text 
+embedding             : <class 'oak.embeddings.image_embedding.ImageEmbedding'>
+blocks                : <class 'torch.nn.modules.container.Sequential'>
+blocks.0              : <class 'oak.core.encoder_block.EncoderBlock'>
+blocks.0.mha          : <class 'oak.core.mha.MultiHeadAttention'>
+blocks.0.mha.heads    : <class 'torch.nn.modules.container.ModuleList'>
+blocks.0.mha.heads.0  : <class 'oak.core.attention.Attention'>
+blocks.0.mha.heads.1  : <class 'oak.core.attention.Attention'>
+blocks.0.mha.heads.2  : <class 'oak.core.attention.Attention'>
+blocks.0.mha.heads.3  : <class 'oak.core.attention.Attention'>
+blocks.0.mha.linear   : <class 'torch.nn.modules.linear.Linear'>
+blocks.0.mha.dropout  : <class 'torch.nn.modules.dropout.Dropout'>
+blocks.0.mlp          : <class 'oak.core.mlp.MLP'>
+blocks.0.mlp.net      : <class 'torch.nn.modules.container.Sequential'>
+blocks.0.mlp.net.0    : <class 'torch.nn.modules.linear.Linear'>
+blocks.0.mlp.net.1    : <class 'torch.nn.modules.activation.ReLU'>
+blocks.0.mlp.net.2    : <class 'torch.nn.modules.linear.Linear'>
+blocks.0.mlp.net.3    : <class 'torch.nn.modules.dropout.Dropout'>
+blocks.0.ln1          : <class 'torch.nn.modules.normalization.LayerNorm'>
+blocks.0.ln2          : <class 'torch.nn.modules.normalization.LayerNorm'>
+blocks.1              : <class 'oak.core.encoder_block.EncoderBlock'>
+...                   : ...
+```
+
 # Package Components
 
 Oak is meant to be easily examined and hacked for your own purposes. As such, the 
@@ -167,178 +283,73 @@ seen below:
 
 ## Package Breakdown
 
-### Datasets ([oak.data](./oak/data))
+### Embeddings
 
-There are currently three datasets available to directly plug in to the models
-implemented here, which hopefully should serve as a guide for how to prepare
-further datasets of interest. The three datasets are relatively small and easy,
-at least as considering the amount of training time necessary to train the 
-supplied models to their tasks.
+Embedding modules for text and images.
 
-The datasets are:
-1. [IWSLT 2017](./oak/data/iwslt.py). This dataset is a translation dataset, 
-consisting of matched sentence pairs between pairs of supported languages. 
-Refer to the [Transformer training script](./scripts/iwslt.py) to see a demo of
-its use.
-2. [Shakespeare](./oak/data/shakespeare.py). This dataset contains 40k lines of
-Shakespeare plays. Refer to the [GPT training script](./scripts/shakespeare.py)
-to see a demo of its use.
-3. [MNIST](./oak/data/mnist.py). This dataset contains 28x28 images of 
-handwritten digits. Refer to the [ViT training script](./scripts/mnist_train.py)
-to see a demo of its use.
+1. [TextEmbedding](./oak/embeddings/text_embedding.py)— Converts a tokenized 
+text input with shape ($B$, $L$) into an embedding with dimensions ($B$, $L$, 
+$d_{model}$).
+2. [ImageEmbedding](./oak/embeddings/image_embedding.py)— Converts a batch 
+of images with shape ($B$, $C$, $H$, $W$) into an embedding with dimensions
+($B$, $L$, $d_{models}$)
 
-### Utils ([oak.utils](./oak/utils))
+### Core
 
-There are a couple notable utilities used throughout this repo, all accessible
-at the top level Oak namespace. They are,
+The core components of all Transformer architectures.
 
-1. [LightningModel](./oak/utils/lightning.py)— a PyTorch Lightning wrapper 
-for all of the models implemented in this repo. The models in this repo 
-are all implements as standard `torch.nn.Modules`, which we wrap in a 
-`pytorch_lightning.LightningModule` to simplify training. That is, you may
-train a model and view its progress on Tensorboard with:
+1. [Attention](./oak/core/attention.py)— Implements a dot-product attention 
+module. Also handles cross-attention and masked-attention, when applicable.
+2. [MultiHeadAttention](./oak/core/mha.py)— Implements MultiHeadAttention.
+3. [MLP](./oak/core/mlp.py)— Implements the MLP layer used in [Dosovitskiy et al. 2020](https://arxiv.org/pdf/2010.11929.pdf);
+used for all feed forward and MLP layers across architectures.
+4. [EncoderBlock](./oak/core/encoder_block.py)— Implements a single encoder block,
+as per [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf).
+5. [DecoderBlock](./oak/core/decoder_block.py)— Implements a single decoder block,
+as per [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf).
 
-```python 
-from pytorch_lightning import Trainer
-from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
+### Transformers
 
-from oak import LightningModel  # PyTorch Lightning Wrapper
-from oak.data import MNIST  # Note all datasets are implemented as Lightning DataModules
-from oak.transformers import VisionTransformer
-
-dm = MNIST()
-vit = VisionTransformer(**param)  # -> torch.nn.Module
-vit = LightningModel(vit)   # -> pytorch_lightning.LightningModule, can be passed into Trainer
-
-logger = TensorBoardLogger()
-trainer = Trainer(logger=logger)
-trainer.fit(vit, dm)
-trainer.test(vit, dm)
-```
-
-You may now launch Tensorboard from a terminal with, 
-
-```terminal
-tensorboard --logdir=./scripts
-```
-
-Opening a browser to the local host server, you should see something similar to the
-following:
-
-[MNIST Training Results](./resources/mnist_training_results.png)
-
-Note that at this time, the following Data-Model pairs are supported for training:
-
-|             | Transformer | GPT | ViT |
-|------------:|:-----------:|:---:|:---:|
-|  IWSLT 2017 |      x      |     |     |
-| Shakespeare |             |  x  |     |
-|       MNIST |             |     |  x  |
-
-2. [Tokenizer](./oak/utils/tokenizer.py) and [ShakespeareTokenizer](./oak/utils/shakespeare_tokenizer.py)— 
-tokenizers which can be used for all text-based models. The TextEmbedding 
-module requires that text be transformed from raw text into tokens; both the
-Tokenizer and ShakespeareTokenizer classes are interoperable with the 
-TextEmbedding class for this purpose. The ShakespeareTokenizer uses a char-level 
-tokenization of the Shakespeare dataset, while the Tokenizer class wraps OpenAI's 
-Whisper tokenizer with a few special tokens used to train the Transformer. By 
-default the Tokenizer class will use OpenAI's gpt2 tokenizer. 
-
-You may use a tokenizer as in the following:
-
-```python 
-from oak import Tokenizer
-
-tokenizer = Tokenizer()
-tokens = tokenizer('Hello there, friend!')
-print(f'{tokenizer.decode(tokens)}')  # 'Hello there, friend!'
-```
-3. [Visualizer](./oak/utils/visualizer.py)— the Visualizer class is a wrapper 
-for any nn.Module. When instantiated pass in a nn.Module and a list of module 
-names. The Visualizer may then be called as if it were the original model, only
-now it will store the output of the internal modules given when instantiated, 
-well as the computed $Q$, $K$, $V$, and $A$ matrices for each Attention module
-listed.
-
-For example,
-
-```python
-from oak import MNIST, Visualizer, VisionTransformer
-
-dm = MNIST()
-vit = VisionTransformer(**param)
-visualizer = Visualizer(vit, layers=['embedding', 'blocks.0.mha.heads.0','blocks.0.mha.heads.0'])
-
-image = dm.test[0]
-pred = visualizer(image)
-```
-
-At the end of the code block above, the visualizer now holds a copy of the 
-embedding outputs, as well as $Q$, $K$, $V$ and $A$ values for the two listed 
-attention heads. These feature vectors can be found in `visualizer._features`,
-but they are meant to be viewed through one of the visualizers further PCA or
-plotting methods. For example, we may plot the PCA of the stored features with
-
-```python 
-visualizer.PCA_scatter(layers=['input', 'model.blocks.0.mha.heads.0', 'model.blocks.0.mha.heads.1', 'output'], k=3, embed_index=0)
-```
-which will yield the following plots:
-
-[Visualizer Demo Plots]()
-
-Refer to the [visualizer demo](./scripts/visualizer.py) to recreate the above 
-plots, or [visualizer training demo](./scripts/training_visualizer.py)) for 
-a more advanced usage.
-
-
-### Transformers ([oak.transformers](./oak/transformers))
-At the highest level, each transformer architecture can be imported from the 
-transformers module:
-
-```python 
-from oak.transfomers import Transformer, GPT, VisionTransformer
-```
+Ties together the individual components above to replicate the architectures 
+described.
 
 That is, you can look through their class implementations here: 
 [Transformer](./oak/transformers/transformer.py), [GPT](./oak/transformers/gpt.py), 
 and [VisionTransformer](./oak/transformers/vision_transformer.py).
 
-### Embeddings ([oak.embeddings](./oak/embeddings))
+### Datasets
 
-Each of these models combines an embedding module (either a 
-[text embedding module](./oak/embeddings/text_embedding.py) or an 
-[image embedding module](./oak/embeddings/image_embedding.py)), an encoder comprising one 
-or more [encoder blocks](./oak/core/encoder_block.py) and, optionally, a decoder comprising 
-one or more [decoder blocks](./oak/core/decoder_block.py).
+There are currently three datasets available to directly plug in to the models
+implemented here, which hopefully should serve as a guide for how to prepare
+further datasets of interest. 
 
-The text and image embeddings can be imported from the embeddings module:
+1. [IWSLT 2017](./oak/data/iwslt.py)— This dataset is a translation dataset, 
+consisting of matched sentence pairs between pairs of supported languages. 
+Refer to the [Transformer training script](./scripts/iwslt.py) to see a demo of
+its use.
+2. [Shakespeare](./oak/data/shakespeare.py)— This dataset contains 40k lines of
+Shakespeare plays. Refer to the [GPT training script](./scripts/shakespeare.py)
+to see a demo of its use.
+3. [MNIST](./oak/data/mnist.py)— This dataset contains 28x28 images of 
+handwritten digits. Refer to the [ViT training script](./scripts/mnist_train.py)
+to see a demo of its use.
 
-```python 
-from oak.embeddings import TextEmbedding, ImageEmbedding
-```
+### Utils
 
-### Core ([oak.core](./oak/core))
+There are a couple notable utilities used throughout this repo, all accessible
+at the top level Oak namespace. They are,
+
+1. [LightningModel](./oak/utils/lightning.py)— a PyTorch Lightning wrapper 
+for all of the models implemented in this repo.
+2. [ShakespeareTokenizer](./oak/utils/shakespeare_tokenizer.py)— simple 
+char-level tokenizer. 
+3. [Tokenizer](./oak/utils/tokenizer.py)— wrapper around OpenAI's Whisper 
+tokenizer. Defaults to the gpt-2 tokenizer.
+4. [Visualizer](./oak/utils/visualizer.py)— wrapper around any `nn.Module`,
+which will add hooks to store and plot intermediate layer values.
 
 
 
-The key component of the encoder and decoder blocks is the Attention Module. As 
-discussed above, the Attention Module is actually split into an 
-[Attention](./oak/core/attention.py) class, which implements the equations 
-desribed above, and a [MultiHeadAttention](./oak/core/mha.py) class, which splits 
-the input into $h$ different Attention heads and passes their concatenated 
-outputs onto the next block.
-
-If you look at the architecture diagrams above, you will notice references to
-*Feed Forward* and *MLP* layers. The implementations used by the original
-papers are effectively interchangeable here, and so we implement the ViT MLP 
-version in its own [MLP](./oak/core/mlp.py) class, reusing
-it for all three transformer architectures for simplicity.
-
-All core components can be imported from the Oak level namespace itself:
-
-```python
-from oak import Attention, MultiHeadAttention, MLP, EncoderBlock, DecoderBlock
-```
 
 # Reference Notation
 Oak uses the following convention throughout:
