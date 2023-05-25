@@ -223,8 +223,8 @@ which will generate new text. The generate method may optionally be prompted,
 which is to say, may be given the beginning of the text to 
 generate, which it will then attempt to continue.
 
-Refer to the Shakespeare training sample for details, but if we train a GPT 
-model on Shakespeare text, which looks like:
+Refer to the Shakespeare training sample for details, but at a high level, we 
+train a GPT model on Shakespeare text, a sample of which is:
 
 ```text 
 ROMEO:
@@ -255,7 +255,7 @@ Of love?
 ROMEO:
 Out of her favour, where I am in love.
 ```
-At first, when randomly initialized, GPT will generate text that looks like
+At first, when randomly initialized, GPT will generate text similar to
 the following:
 ```text
 xywrfzXA,Gp.cNpU':FVAcS:MRgJFaMCctUXmngW?wrojaW:-ukUqGTdvs fuQctwj:Ljdz
