@@ -550,11 +550,11 @@ Oak uses the following convention throughout:
 |            $W_Q$             |          ($d_{model}$, $d_k$)          |                                                           Trainable weight parameters for computing the Queries.                                                           |
 |            $W_K$             |          ($d_{model}$, $d_k$)          |                                                            Trainable weight parameters for computing the Keys.                                                             |
 |            $W_V$             |          ($d_{model}$, $d_v$)          |                                                           Trainable weight parameters for computing the Values.                                                            |
-|              Q               |               ($L$, $d_k$)               |                                                                             Queries, $Q=XW_Q$                                                                              |
-|              K               |               ($L$, $d_k$)               |                                                                               Keys, $K=XW_K$                                                                               |
-|              V               |               ($L$, $d_v$)               |                                                                              Values, $V=XW_V$                                                                              |
-|              A               |                 ($L$, $L$)                 |                     The Attention matrix, $A=softmax(QK^T / \sqrt{d_k})$. Note that for cross-attention the dimensions will be ($L_X$, $L_Y$).                      |
-|              Z               |               ($L$, $d_v$)               |                                                                The output of an Attention Module, $Z = AV$                                                                 |
+|              Q               |               ($B$, $L$, $d_k$)               |                                                                             Queries, $Q=XW_Q$                                                                              |
+|              K               |               ($B$, $L$, $d_k$)               |                                                                               Keys, $K=XW_K$                                                                               |
+|              V               |               ($B$, $L$, $d_v$)               |                                                                              Values, $V=XW_V$                                                                              |
+|              A               |                 ($B$, $L$, $L$)                 |                     The Attention matrix, $A=softmax(QK^T / \sqrt{d_k})$. Note that for cross-attention the dimensions will be ($L_X$, $L_Y$).                      |
+|              Z               |               ($B$, $L$, $d_v$)               |                                                                The output of an Attention Module, $Z = AV$                                                                 |
 
 # Resources
 
