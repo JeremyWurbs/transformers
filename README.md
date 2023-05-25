@@ -553,7 +553,7 @@ Oak uses the following convention throughout:
 |              Q               |               (L, $d_k$)               |                                                                             Queries, $Q=XW_Q$                                                                              |
 |              K               |               (L, $d_k$)               |                                                                               Keys, $K=XW_K$                                                                               |
 |              V               |               (L, $d_v$)               |                                                                              Values, $V=XW_V$                                                                              |
-|              A               |                 (L, L)                 |                     The Attention matrix, $A=softmax(QK.transpose / sqrt{d_k})$. Note that for cross-attention the dimensions will be ($L_X$, $L_Y$).                      |
+|              A               |                 (L, L)                 |                     The Attention matrix, $A=softmax(QK^T / \sqrt{d_k})$. Note that for cross-attention the dimensions will be ($L_X$, $L_Y$).                      |
 |              Z               |               (L, $d_v$)               |                                                                The output of an Attention Module, $Z = AV$                                                                 |
 
 # Resources
