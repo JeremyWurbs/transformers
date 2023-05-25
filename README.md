@@ -291,8 +291,8 @@ character-level tokenizer and not using any pre-trained weights, is pretty
 good. 
 
 If we switch out the character-level tokenizer for GPT-2's tokenizer, we 
-can get longer sequences of sensibleness, if not admittedly still gibberish 
-overall.
+can get longer sequences of sensibleness, though admittedly still mostly 
+gibberish.
 
 ```text
 JULIET:
