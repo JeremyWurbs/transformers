@@ -1,8 +1,8 @@
 # Oak
 
 Oak is an educational package for implementing transformers, and is meant as a
-reference implementation for people learning, implementing their own
-transformer models, or simply playing around with some of their dynamics.
+reference implementation for people learning about transformers, implementing 
+their own transformer models, or simply playing around with some of their dynamics.
 
 Here we implement what we consider the three core transformer architectures:
 1. **Transformer**, as in [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf)
