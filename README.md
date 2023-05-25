@@ -380,11 +380,14 @@ If you run `visualizer.PCA_scatter()` before and after training, it will yield t
 
 Here each dot is an input image, colored by which of the ten digit classes it 
 belongs to. Each individual plot shows the representation of every image in
-the MNIST test set. Of course the PCA plots for the inputs and outputs are to 
-expected-- the input PCA plots do not change, while the output PCA plots start
-fairly randomized at the start of training and are highly clustered after training.
-What is more interesting, however, is the specialization exhibited by 
-individual attention heads as processing passes through the network.
+the MNIST test set. Here the general look of the PCA plots for the inputs and 
+outputs are as we might expect— the input PCA plots do not change at all, while the 
+PCA plot for the output starts out fairly randomized (though with some correlations
+still clearly present), while by the end of training the output PCA is highly
+clustered. 
+
+What is more interesting, however, is the specialization exhibited by individual 
+attention heads as processing passes through the network.
 
 For example, in the first MHA block (i.e. `block 0`), `head 0` seems to become
 specialized in representing features that cluster the digit 6, while those
