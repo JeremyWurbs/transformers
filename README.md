@@ -162,7 +162,7 @@ strategy for trying to grasp the Magic of Transformers, is just to implement
 the equations yourself and start to play around with them. Then read, see what 
 others have done; implement some of their ideas and try to understand why they
 do or do not work; then start to have some ideas of your own that you can 
-implement and play around with. Then its rinse and repeat. No magic in trying
+implement and play around with. Then it's rinse and repeat. No magic in trying
 to understand the magic, I'm afraid.
 
 # Using Oak
