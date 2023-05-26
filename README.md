@@ -191,7 +191,7 @@ python setup.py bdist_wheel
 pip install dist/oak-1.0.0-py3-none-any.whl
 ```
 
-## Training Sample
+## Training
 
 Each implemented architecture comes with a dataset that can be used to train it.
 At this time, the following Data-Model pairs are supported for training:
