@@ -169,8 +169,6 @@ to understand the magic, I'm afraid.
 
 ## Installation
 
-# Installation
-
 Clone the repo and then install the package, either through a wheel or
 just installing the dependencies directly, as desired. I.e. 
 
