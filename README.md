@@ -517,13 +517,13 @@ further datasets of interest.
 
 1. [IWSLT 2017](./oak/data/iwslt.py)— This dataset is a translation dataset, 
 consisting of matched sentence pairs between pairs of supported languages. 
-Refer to the [Transformer training script](./scripts/iwslt.py) to see a demo of
+Refer to the [Transformer training script](./scripts/transformer_train.py) to see a demo of
 its use.
 2. [Shakespeare](./oak/data/shakespeare.py)— This dataset contains 40k lines of
-Shakespeare plays. Refer to the [GPT training script](./scripts/shakespeare.py)
+Shakespeare plays. Refer to the [GPT training script](./scripts/gpt_train.py)
 to see a demo of its use.
 3. [MNIST](./oak/data/mnist.py)— This dataset contains 28x28 images of 
-handwritten digits. Refer to the [ViT training script](./scripts/mnist_train.py)
+handwritten digits. Refer to the [ViT training script](./scripts/vit_train.py)
 to see a demo of its use.
 
 ### Utils
