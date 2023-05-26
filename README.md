@@ -167,6 +167,30 @@ to understand the magic, I'm afraid.
 
 # Using Oak
 
+## Installation
+
+# Installation
+
+Clone the repo and then install the package, either through a wheel or
+just installing the dependencies directly, as desired. I.e. 
+
+```commandline
+git clone https://github.com/JeremyWurbs/transformers.git && cd transformers
+```
+
+Followed by one of the following:
+
+```commandline
+pip install -r requirements.txt
+```
+
+OR
+
+```commandline
+python setup.py bdist_wheel
+pip install dist/oak-1.0.0-py3-none-any.whl
+```
+
 ## Training Sample
 
 Each implemented architecture comes with a dataset that can be used to train it.
