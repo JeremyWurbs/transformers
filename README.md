@@ -505,12 +505,11 @@ as per [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf).
 
 ### Transformers
 
-Ties together the individual components above to replicate the architectures 
-described.
+The module containing the actual class definitions for each transformer architecture.
 
-That is, you can look through their class implementations here: 
-[Transformer](./oak/transformers/transformer.py), [GPT](./oak/transformers/gpt.py), 
-and [VisionTransformer](./oak/transformers/vision_transformer.py).
+1. [Transformer](./oak/transformers/transformer.py)— As per [Vaswani et al. 2017](https://arxiv.org/pdf/1706.03762.pdf).
+2. [GPT](./oak/transformers/gpt.py)— As per [Radford et al. 2018](https://www.cs.ubc.ca/~amuham01/LING530/papers/radford2018improving.pdf).
+3. [VisionTransformer](./oak/transformers/vision_transformer.py)— As per [Dosovitskiy et al. 2020](https://arxiv.org/pdf/2010.11929.pdf).
 
 ### Datasets
 
