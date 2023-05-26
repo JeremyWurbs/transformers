@@ -434,9 +434,8 @@ For explicit implementation details of this case, however, refer to the
 [visualizer training demo](./scripts/training_visualizer.py) for 
 a more advanced usage.
 
-Also note, to determine the available layer names, which you may pass into the
-Visualizer to track intermediate values for you, you can print the names for 
-all the modules in your model with the following.
+Also note, to determine the available layers that can be tracked, you can print 
+the names for all the modules in your model with the following:
 
 ```python 
 from oak.transformers import VisionTransformer
