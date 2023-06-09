@@ -3,9 +3,11 @@ import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 
-from oak import Shakespeare, GPT, LightningModel, Tokenizer, ShakespeareTokenizer
+from oak import LightningModel, ShakespeareTokenizer, Tokenizer
+from oak.data import Shakespeare
+from oak.transformers import GPT
 
-torch.set_float32_matmul_precision('medium')
+#torch.set_float32_matmul_precision('medium')
 
 param = {
     'num_blocks': 6,
@@ -18,7 +20,7 @@ param = {
 }
 
 tokenizer = ShakespeareTokenizer()  # Use Tokenizer() for gpt2 tokens, or ShakespeareTokenizer() for char-level tokens
-dm = Shakespeare(batch_size=param['batch_size'], block_size=param['seq_len'], num_workers=48, tokenizer=tokenizer)
+dm = Shakespeare(batch_size=param['batch_size'], block_size=param['seq_len'], num_workers=2, tokenizer=tokenizer)
 model = GPT(vocab_size=dm.vocab_size, **param)
 
 gen_id = [0]

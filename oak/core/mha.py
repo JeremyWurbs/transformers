@@ -63,7 +63,8 @@ class MultiHeadAttention(nn.Module):
         self.d_v = d_v
         self.dropout = dropout
 
-        self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v, mask=mask) for _ in range(h)])
+        #self.heads = nn.ModuleList([Attention(d_model=self.d_head, d_k=d_k, d_v=d_v, mask=mask) for _ in range(h)])
+        self.heads = nn.ModuleList([Attention(d_model=self.d_model, d_k=d_k, d_v=d_v, mask=mask) for _ in range(h)])
         self.linear = nn.Linear(h*d_v, d_model)
         self.dropout = nn.Dropout(dropout)
 
@@ -71,14 +72,16 @@ class MultiHeadAttention(nn.Module):
         B, L, d_model = X.shape
 
         if Y is None:  # Self-Attention
-            X = X.view(B, L, self.h, self.d_head)  # (B, L, d_model) -> (B, L, h, d_head)
-            Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
+            #X = X.view(B, L, self.h, self.d_head)  # (B, L, d_model) -> (B, L, h, d_head)
+            #Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
+            Z = torch.cat([self.heads[i](X) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
 
         else:  # Cross-Attention
-            _, L_Y, _ = Y.shape
-            X = X.view(B, L, self.h, self.d_head)  # (B, L, d_model) -> (B, L, h, d_head)
-            Y = Y.view(B, L_Y, self.h, self.d_head)  # (B, L_Y, d_model) -> (B, L_Y, h, d_head)
-            Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2), Y[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
+            #_, L_Y, _ = Y.shape
+            #X = X.view(B, L, self.h, self.d_head)  # (B, L, d_model) -> (B, L, h, d_head)
+            #Y = Y.view(B, L_Y, self.h, self.d_head)  # (B, L_Y, d_model) -> (B, L_Y, h, d_head)
+            #Z = torch.cat([self.heads[i](X[:, :, i, :].squeeze(2), Y[:, :, i, :].squeeze(2)) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
+            Z = torch.cat([self.heads[i](X, Y) for i in range(self.h)], dim=-1)  # -> (B, L, h*d_v)
 
         Z = self.dropout(self.linear(Z))  # (B, L, h*d_v) -> (B, L, d_model)
         return Z
