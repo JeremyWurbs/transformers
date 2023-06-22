@@ -593,7 +593,7 @@ make them.
 
 ### Understanding Transformers
 1. Lucas Beyer, Transformers. [Slides](https://docs.google.com/presentation/d/1ZXFIhYczos679r70Yu8vV9uO6B1J0ztzeDxbnBxD1S0/edit#slide=id.g31364026ad_3_2), [Talk](https://www.youtube.com/watch?v=EixI6t5oif0&ab_channel=MLTArtificialIntelligence)
-2. Lilian Wang, [The Transformer Family](https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/)
+2. Lilian Weng, [The Transformer Family](https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/)
 3. Aritra Gosthipaty and Sayak Paul, [Investigating Transformer Representations](https://keras.io/examples/vision/probing_vits/)
 
 ### Open Source
